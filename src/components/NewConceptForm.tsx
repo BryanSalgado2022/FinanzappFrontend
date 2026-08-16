@@ -1,0 +1,117 @@
+import { useState, type FormEvent } from 'react'
+import { useCreateConcept } from '../hooks/useConcepts'
+import type { TipoConcepto } from '../types'
+
+const TIPO_OPTIONS: { value: TipoConcepto; label: string }[] = [
+  { value: 'gasto_fijo', label: 'Gasto fijo' },
+  { value: 'deuda', label: 'Deuda' },
+  { value: 'ingreso', label: 'Ingreso' },
+]
+
+const inputClass =
+  'w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
+
+export function NewConceptForm({ onDone }: { onDone: () => void }) {
+  const [nombre, setNombre] = useState('')
+  const [tipo, setTipo] = useState<TipoConcepto>('gasto_fijo')
+  const [categoria, setCategoria] = useState('')
+  const [valorTotal, setValorTotal] = useState('')
+  const [montoPlaneado, setMontoPlaneado] = useState('')
+  const createConcept = useCreateConcept()
+
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault()
+    createConcept.mutate(
+      {
+        nombre,
+        tipo,
+        categoria: categoria || undefined,
+        valor_total: tipo === 'deuda' && valorTotal ? valorTotal : undefined,
+        monto_planeado: montoPlaneado || undefined,
+      },
+      { onSuccess: onDone },
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-10 flex items-end justify-center bg-ink/50 backdrop-blur-sm sm:items-center">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-sm space-y-3.5 rounded-t-3xl border border-line bg-paper-raised p-6 shadow-xl sm:rounded-3xl"
+      >
+        <h2 className="font-display text-xl font-medium text-ink">Nuevo concepto</h2>
+
+        <input
+          required
+          placeholder="Nombre"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          className={inputClass}
+        />
+
+        <div className="flex gap-1.5 rounded-xl bg-paper p-1">
+          {TIPO_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setTipo(option.value)}
+              className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition ${
+                tipo === option.value
+                  ? 'bg-ink text-paper'
+                  : 'text-ink-muted hover:text-ink'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        <input
+          placeholder="Categoría (opcional)"
+          value={categoria}
+          onChange={(e) => setCategoria(e.target.value)}
+          className={inputClass}
+        />
+
+        {tipo === 'deuda' && (
+          <input
+            placeholder="Valor total de la deuda"
+            inputMode="decimal"
+            value={valorTotal}
+            onChange={(e) => setValorTotal(e.target.value)}
+            className={inputClass}
+          />
+        )}
+
+        <input
+          placeholder="Monto planeado este mes (opcional)"
+          inputMode="decimal"
+          value={montoPlaneado}
+          onChange={(e) => setMontoPlaneado(e.target.value)}
+          className={inputClass}
+        />
+
+        {createConcept.isError && (
+          <p className="text-sm text-danger">No se pudo crear el concepto.</p>
+        )}
+
+        <div className="flex justify-end gap-2 pt-1">
+          <button
+            type="button"
+            onClick={onDone}
+            className="rounded-full px-4 py-2 text-sm text-ink-muted transition hover:text-ink"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={createConcept.isPending}
+            className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:opacity-90 disabled:opacity-50"
+          >
+            {createConcept.isPending ? 'Creando…' : 'Crear'}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}

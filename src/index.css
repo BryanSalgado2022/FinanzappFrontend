@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+}
+
+:root {
+  color-scheme: light dark;
+
+  --paper: #faf6ee;
+  --paper-raised: #fffdf9;
+  --ink: #241f18;
+  --ink-muted: #7c7160;
+  --line: #e6ddc7;
+  --accent: #3f6b4a;
+  --accent-soft: #e6efe2;
+  --warn: #b4772b;
+  --warn-soft: #f6ead6;
+  --danger: #a8402f;
+  --danger-soft: #f5e2dc;
+}
+
+.dark {
+  --paper: #14140f;
+  --paper-raised: #1c1c15;
+  --ink: #f2ede0;
+  --ink-muted: #a89e8a;
+  --line: rgba(255, 255, 255, 0.09);
+  --accent: #85c091;
+  --accent-soft: rgba(133, 192, 145, 0.14);
+  --warn: #e3a559;
+  --warn-soft: rgba(227, 165, 89, 0.14);
+  --danger: #e08774;
+  --danger-soft: rgba(224, 135, 116, 0.14);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+}
