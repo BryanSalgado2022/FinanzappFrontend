@@ -136,7 +136,13 @@ export function Dashboard() {
                           : 'text-ink-muted'
                     }`}
                   >
-                    {entry?.pagado ? '✓ Pagado' : entry ? 'Pendiente' : 'Sin entrada'}
+                    {entry?.pagado
+                      ? concepto.tipo === 'ingreso'
+                        ? '✓ Recibido'
+                        : '✓ Pagado'
+                      : entry
+                        ? 'Pendiente'
+                        : 'Sin entrada'}
                   </span>
                 </Link>
               </li>

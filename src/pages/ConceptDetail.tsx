@@ -193,6 +193,7 @@ export function ConceptDetail() {
                     mes={mes}
                     isCurrentMonth={anio === now.getFullYear() && mes === now.getMonth() + 1}
                     entry={entriesByMonth.get(mes)}
+                    tipo={c.tipo}
                     saving={upsertEntry.isPending}
                     onSave={(input) => upsertEntry.mutate({ anio, mes, input })}
                   />

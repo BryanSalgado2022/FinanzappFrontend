@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../hooks/useTheme'
 
 export function Login() {
-  const { signInWithGoogleCredential, signInError } = useAuth()
+  const { signInWithGoogleCredential, signInAsDevUser, signInError } = useAuth()
   const { theme } = useTheme()
 
   return (
@@ -46,6 +46,16 @@ export function Login() {
             }}
           />
         </div>
+
+        {import.meta.env.DEV && (
+          <button
+            type="button"
+            onClick={() => void signInAsDevUser()}
+            className="mt-4 text-xs text-ink-muted underline decoration-line underline-offset-4 hover:text-ink"
+          >
+            Entrar como invitado (solo desarrollo)
+          </button>
+        )}
 
         {signInError && <p className="mt-4 text-sm text-danger">{signInError}</p>}
       </div>

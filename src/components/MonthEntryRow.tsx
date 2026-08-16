@@ -1,13 +1,23 @@
 import { useState } from 'react'
 import { formatCOP, monthName } from '../lib/format'
-import type { EntradaMensual } from '../types'
+import type { EntradaMensual, TipoConcepto } from '../types'
 
 interface MonthEntryRowProps {
   mes: number
   isCurrentMonth: boolean
   entry: EntradaMensual | undefined
+  tipo: TipoConcepto
   onSave: (input: { monto_planeado: string; monto_pagado?: string; pagado?: boolean }) => void
   saving: boolean
+}
+
+// "Pagado"/"monto pagado" only makes sense for money going out (deuda,
+// gasto_fijo). For an ingreso, the same field means "¿ya lo recibiste?" -
+// same underlying data, different label so it reads correctly either way.
+const LABELS: Record<TipoConcepto, { planeado: string; real: string; estado: string }> = {
+  deuda: { planeado: 'Monto planeado', real: 'Monto pagado (opcional)', estado: 'Pagado' },
+  gasto_fijo: { planeado: 'Monto planeado', real: 'Monto pagado (opcional)', estado: 'Pagado' },
+  ingreso: { planeado: 'Monto esperado', real: 'Monto recibido (opcional)', estado: 'Recibido' },
 }
 
 const inputClass =
@@ -44,7 +54,8 @@ function Node({ entry, isCurrentMonth }: { entry: EntradaMensual | undefined; is
   )
 }
 
-export function MonthEntryRow({ mes, isCurrentMonth, entry, onSave, saving }: MonthEntryRowProps) {
+export function MonthEntryRow({ mes, isCurrentMonth, entry, tipo, onSave, saving }: MonthEntryRowProps) {
+  const labels = LABELS[tipo]
   const [editing, setEditing] = useState(false)
   const [montoPlaneado, setMontoPlaneado] = useState(entry?.monto_planeado ?? '')
   const [montoPagado, setMontoPagado] = useState(entry?.monto_pagado ?? '')
@@ -92,14 +103,14 @@ export function MonthEntryRow({ mes, isCurrentMonth, entry, onSave, saving }: Mo
           <div className="space-y-2 rounded-xl border border-line bg-paper-raised p-3">
             <p className="text-xs font-medium text-ink-muted">{monthName(mes)}</p>
             <input
-              placeholder="Monto planeado"
+              placeholder={labels.planeado}
               inputMode="decimal"
               value={montoPlaneado}
               onChange={(e) => setMontoPlaneado(e.target.value)}
               className={inputClass}
             />
             <input
-              placeholder="Monto pagado (opcional)"
+              placeholder={labels.real}
               inputMode="decimal"
               value={montoPagado}
               onChange={(e) => setMontoPagado(e.target.value)}
@@ -112,7 +123,7 @@ export function MonthEntryRow({ mes, isCurrentMonth, entry, onSave, saving }: Mo
                 onChange={(e) => setPagado(e.target.checked)}
                 className="accent-accent"
               />
-              Pagado
+              {labels.estado}
             </label>
             <div className="flex justify-end gap-2 pt-1">
               <button

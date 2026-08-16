@@ -8,6 +8,7 @@ interface AuthContextValue {
   isAuthenticated: boolean
   signInError: string | null
   signInWithGoogleCredential: (credential: string) => Promise<void>
+  signInAsDevUser: () => Promise<void>
   signOut: () => void
 }
 
@@ -60,12 +61,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Backend-guarded (DEV_MODE) and only ever called from a button that is
+  // itself gated behind import.meta.env.DEV, so this path is unreachable in
+  // a production build regardless of what the backend has enabled.
+  const signInAsDevUser = async () => {
+    setSignInError(null)
+    try {
+      const { access_token } = await apiClient.post<{ access_token: string; token_type: string }>(
+        '/auth/dev-login',
+      )
+      const next: StoredSession = {
+        accessToken: access_token,
+        user: { email: 'dev@localhost', name: 'Usuario de prueba' },
+      }
+      saveStoredSession(next)
+      setAuthToken(next.accessToken)
+      setSession(next)
+    } catch {
+      setSignInError('El login de desarrollo no está disponible (¿DEV_MODE=true en el backend?).')
+    }
+  }
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user: session?.user ?? null,
       isAuthenticated: session !== null,
       signInError,
       signInWithGoogleCredential,
+      signInAsDevUser,
       signOut: clearSession,
     }),
     [session, signInError],
