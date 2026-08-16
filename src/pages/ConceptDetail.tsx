@@ -106,7 +106,7 @@ export function ConceptDetail() {
                       {formatCOP(c.saldo_restante!)}
                     </p>
                     <p className="text-xs text-ink-muted">
-                      saldo restante de {formatCOP(c.valor_total!)}
+                      de {formatCOP(c.valor_total!)} prestados originalmente
                     </p>
                   </div>
                 </div>
