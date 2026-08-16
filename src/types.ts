@@ -1,4 +1,5 @@
 export type TipoConcepto = 'deuda' | 'gasto_fijo' | 'ingreso'
+export type PeriodoTasa = 'mensual' | 'anual'
 
 export interface Concepto {
   id: number
@@ -7,6 +8,10 @@ export interface Concepto {
   categoria: string | null
   valor_total: string | null
   saldo_restante: string | null
+  tasa_interes: string | null
+  periodo_tasa: PeriodoTasa | null
+  numero_cuotas: number | null
+  cuota_fija: string | null
   activo: boolean
 }
 
@@ -16,6 +21,11 @@ export interface ConceptoCreateInput {
   categoria?: string
   valor_total?: string
   monto_planeado?: string
+  // Amortization terms (deuda only, optional): tasa_interes and numero_cuotas
+  // must be provided together. Immutable after creation - see FinanzappBackend.
+  tasa_interes?: string
+  periodo_tasa?: PeriodoTasa
+  numero_cuotas?: number
 }
 
 export interface ConceptoUpdateInput {
@@ -47,6 +57,32 @@ export interface MonthlySummary {
   total_ingresos: string
   total_gastos: string
   balance_neto: string
+}
+
+export interface DebtComposition {
+  concepto_id: number
+  nombre: string
+  saldo_restante: string
+}
+
+export interface DebtsSummary {
+  numero_deudas: number
+  total_adeudado: string
+  total_pagado: string
+  saldo_total_restante: string
+  progreso_porcentaje: string
+  composicion: DebtComposition[]
+}
+
+export interface AnnualMonthTotal {
+  mes: number
+  total_ingresos: string
+  total_gastos: string
+}
+
+export interface AnnualTrend {
+  anio: number
+  meses: AnnualMonthTotal[]
 }
 
 // The backend has no "get current user" endpoint and its JWT payload only

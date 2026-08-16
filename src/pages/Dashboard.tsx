@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Header } from '../components/Header'
 import { NewConceptForm } from '../components/NewConceptForm'
+import { AnnualTrendChart } from '../components/AnnualTrendChart'
 import { useSummary } from '../hooks/useSummary'
+import { useAnnualTrend } from '../hooks/useAnnualTrend'
 import { useDashboardConcepts } from '../hooks/useDashboardConcepts'
 import { formatCOP, monthName, tipoDotClass, tipoLabel } from '../lib/format'
 
@@ -14,6 +16,7 @@ export function Dashboard() {
   const [showNewConcept, setShowNewConcept] = useState(false)
 
   const summary = useSummary(anio, mes)
+  const annualTrend = useAnnualTrend(anio)
   const { rows, isLoading: rowsLoading } = useDashboardConcepts(anio, mes)
 
   const goToPreviousMonth = () => {
@@ -148,6 +151,23 @@ export function Dashboard() {
               </li>
             ))}
           </ul>
+        </div>
+
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-lg font-medium text-ink">Tendencia {anio}</h2>
+            <Link
+              to="/deudas"
+              className="text-sm text-ink-muted underline decoration-line underline-offset-4 hover:text-ink"
+            >
+              Ver deudas →
+            </Link>
+          </div>
+          {annualTrend.data ? (
+            <AnnualTrendChart trend={annualTrend.data} />
+          ) : (
+            <p className="text-sm text-ink-muted">Cargando…</p>
+          )}
         </div>
       </main>
 

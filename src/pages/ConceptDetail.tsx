@@ -108,6 +108,27 @@ export function ConceptDetail() {
                 </div>
               )}
 
+              {c.cuota_fija !== null && (
+                <div className="mt-4 grid grid-cols-3 gap-3 rounded-xl bg-paper px-3 py-2.5 text-center">
+                  <div>
+                    <p className="text-xs text-ink-muted">Cuota fija</p>
+                    <p className="font-tabular text-sm font-semibold text-ink">
+                      {formatCOP(c.cuota_fija)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-ink-muted">Tasa</p>
+                    <p className="font-tabular text-sm font-semibold text-ink">
+                      {c.tasa_interes}% {c.periodo_tasa}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-ink-muted">Cuotas</p>
+                    <p className="font-tabular text-sm font-semibold text-ink">{c.numero_cuotas}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="mt-5 flex gap-4 border-t border-line pt-4 text-sm">
                 {c.activo && (
                   <button

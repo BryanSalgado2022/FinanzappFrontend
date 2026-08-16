@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useCreateConcept } from '../hooks/useConcepts'
-import type { TipoConcepto } from '../types'
+import type { PeriodoTasa, TipoConcepto } from '../types'
 
 const TIPO_OPTIONS: { value: TipoConcepto; label: string }[] = [
   { value: 'gasto_fijo', label: 'Gasto fijo' },
@@ -17,7 +17,12 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
   const [categoria, setCategoria] = useState('')
   const [valorTotal, setValorTotal] = useState('')
   const [montoPlaneado, setMontoPlaneado] = useState('')
+  const [tasaInteres, setTasaInteres] = useState('')
+  const [periodoTasa, setPeriodoTasa] = useState<PeriodoTasa>('mensual')
+  const [numeroCuotas, setNumeroCuotas] = useState('')
   const createConcept = useCreateConcept()
+
+  const tieneAmortizacion = tipo === 'deuda' && tasaInteres !== '' && numeroCuotas !== ''
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
@@ -27,7 +32,10 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
         tipo,
         categoria: categoria || undefined,
         valor_total: tipo === 'deuda' && valorTotal ? valorTotal : undefined,
-        monto_planeado: montoPlaneado || undefined,
+        monto_planeado: tieneAmortizacion ? undefined : montoPlaneado || undefined,
+        tasa_interes: tieneAmortizacion ? tasaInteres : undefined,
+        periodo_tasa: tieneAmortizacion ? periodoTasa : undefined,
+        numero_cuotas: tieneAmortizacion ? Number(numeroCuotas) : undefined,
       },
       { onSuccess: onDone },
     )
@@ -37,7 +45,7 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
     <div className="fixed inset-0 z-10 flex items-end justify-center bg-ink/50 backdrop-blur-sm sm:items-center">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm space-y-3.5 rounded-t-3xl border border-line bg-paper-raised p-6 shadow-xl sm:rounded-3xl"
+        className="max-h-[90svh] w-full max-w-sm space-y-3.5 overflow-y-auto rounded-t-3xl border border-line bg-paper-raised p-6 shadow-xl sm:rounded-3xl"
       >
         <h2 className="font-display text-xl font-medium text-ink">Nuevo concepto</h2>
 
@@ -74,22 +82,57 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
         />
 
         {tipo === 'deuda' && (
+          <>
+            <input
+              placeholder="Valor total de la deuda"
+              inputMode="decimal"
+              value={valorTotal}
+              onChange={(e) => setValorTotal(e.target.value)}
+              className={inputClass}
+            />
+
+            <div className="rounded-xl border border-line p-3">
+              <p className="mb-2 text-xs text-ink-muted">
+                Opcional: si conoces la tasa de interés y el número de cuotas, calculamos la
+                cuota fija automáticamente (no editable después).
+              </p>
+              <div className="flex gap-2">
+                <input
+                  placeholder="Tasa de interés (%)"
+                  inputMode="decimal"
+                  value={tasaInteres}
+                  onChange={(e) => setTasaInteres(e.target.value)}
+                  className={inputClass}
+                />
+                <select
+                  value={periodoTasa}
+                  onChange={(e) => setPeriodoTasa(e.target.value as PeriodoTasa)}
+                  className={`${inputClass} w-auto`}
+                >
+                  <option value="mensual">mensual</option>
+                  <option value="anual">anual (E.A.)</option>
+                </select>
+              </div>
+              <input
+                placeholder="Número de cuotas"
+                inputMode="numeric"
+                value={numeroCuotas}
+                onChange={(e) => setNumeroCuotas(e.target.value)}
+                className={`${inputClass} mt-2`}
+              />
+            </div>
+          </>
+        )}
+
+        {!tieneAmortizacion && (
           <input
-            placeholder="Valor total de la deuda"
+            placeholder="Monto planeado este mes (opcional)"
             inputMode="decimal"
-            value={valorTotal}
-            onChange={(e) => setValorTotal(e.target.value)}
+            value={montoPlaneado}
+            onChange={(e) => setMontoPlaneado(e.target.value)}
             className={inputClass}
           />
         )}
-
-        <input
-          placeholder="Monto planeado este mes (opcional)"
-          inputMode="decimal"
-          value={montoPlaneado}
-          onChange={(e) => setMontoPlaneado(e.target.value)}
-          className={inputClass}
-        />
 
         {createConcept.isError && (
           <p className="text-sm text-danger">No se pudo crear el concepto.</p>

@@ -17,6 +17,15 @@
   --color-warn-soft: var(--warn-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
+
+  --color-viz-series-1: var(--viz-series-1);
+  --color-viz-series-2: var(--viz-series-2);
+  --color-viz-series-3: var(--viz-series-3);
+  --color-viz-series-4: var(--viz-series-4);
+  --color-viz-series-5: var(--viz-series-5);
+  --color-viz-series-6: var(--viz-series-6);
+  --color-viz-series-7: var(--viz-series-7);
+  --color-viz-series-8: var(--viz-series-8);
 }
 
 :root {
@@ -33,6 +42,21 @@
   --warn-soft: #f6ead6;
   --danger: #a8402f;
   --danger-soft: #f5e2dc;
+
+  /* Chart tokens (dataviz skill's validated default categorical palette).
+     Kept separate from the decorative accent/warn/danger above - those
+     failed the CVD-separation check when tried as a 2-series chart pair. */
+  --viz-grid: #e1e0d9;
+  --viz-baseline: #c3c2b7;
+  --viz-muted: #898781;
+  --viz-series-1: #2a78d6; /* blue: ingresos */
+  --viz-series-2: #eb6834; /* orange: gastos */
+  --viz-series-3: #1baf7a;
+  --viz-series-4: #eda100;
+  --viz-series-5: #e87ba4;
+  --viz-series-6: #008300;
+  --viz-series-7: #4a3aa7;
+  --viz-series-8: #e34948;
 }
 
 .dark {
@@ -47,6 +71,18 @@
   --warn-soft: rgba(227, 165, 89, 0.14);
   --danger: #e08774;
   --danger-soft: rgba(224, 135, 116, 0.14);
+
+  --viz-grid: #2c2c2a;
+  --viz-baseline: #383835;
+  --viz-muted: #898781;
+  --viz-series-1: #3987e5;
+  --viz-series-2: #d95926;
+  --viz-series-3: #199e70;
+  --viz-series-4: #c98500;
+  --viz-series-5: #d55181;
+  --viz-series-6: #008300;
+  --viz-series-7: #9085e9;
+  --viz-series-8: #e66767;
 }
 
 body {
