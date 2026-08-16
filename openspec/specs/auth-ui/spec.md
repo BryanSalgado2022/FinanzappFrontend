@@ -1,7 +1,7 @@
 # auth-ui Specification
 
 ## Purpose
-Lets the user sign in with their Google account from the browser and keeps every screen behind that session, so no view ever shows or accepts data without an authenticated user.
+Lets the user sign in with their Google account or a self-managed email/password from the browser and keeps every screen behind that session, so no view ever shows or accepts data without an authenticated user.
 
 ## Requirements
 

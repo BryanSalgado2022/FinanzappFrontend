@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { apiClient, setAuthToken, setUnauthorizedHandler } from '../lib/apiClient'
+import { ApiError, apiClient, setAuthToken, setUnauthorizedHandler } from '../lib/apiClient'
 import { clearStoredSession, loadStoredSession, saveStoredSession, type StoredSession } from '../lib/session'
 import type { User } from '../types'
 
@@ -9,6 +9,8 @@ interface AuthContextValue {
   signInError: string | null
   signInWithGoogleCredential: (credential: string) => Promise<void>
   signInAsDevUser: () => Promise<void>
+  signInWithPassword: (email: string, password: string) => Promise<void>
+  registerWithPassword: (nombre: string, email: string, password: string) => Promise<void>
   signOut: () => void
 }
 
@@ -22,6 +24,24 @@ function decodeGoogleCredential(credential: string): User {
     picture?: string
   }
   return { email: payload.email, name: payload.name, picture: payload.picture }
+}
+
+function mapPasswordAuthError(err: unknown, kind: 'login' | 'register'): string {
+  if (!(err instanceof ApiError)) {
+    return kind === 'login' ? 'No se pudo iniciar sesión.' : 'No se pudo crear la cuenta.'
+  }
+  switch (err.status) {
+    case 409:
+      return 'Ese correo ya tiene una cuenta. Intenta iniciar sesión.'
+    case 401:
+      return 'Correo o contraseña incorrectos.'
+    case 429:
+      return 'Demasiados intentos. Espera un momento y vuelve a intentar.'
+    case 422:
+      return 'La contraseña debe tener al menos 8 caracteres.'
+    default:
+      return kind === 'login' ? 'No se pudo iniciar sesión.' : 'No se pudo crear la cuenta.'
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -82,6 +102,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // The backend never echoes back a display name for password sign-in
+  // (TokenResponse is just the token) - email is the only identifier
+  // available client-side, so it doubles as the display name here.
+  const signInWithPassword = async (email: string, password: string) => {
+    setSignInError(null)
+    try {
+      const { access_token } = await apiClient.post<{ access_token: string; token_type: string }>(
+        '/auth/login',
+        { email, password },
+      )
+      const next: StoredSession = { accessToken: access_token, user: { email, name: email } }
+      saveStoredSession(next)
+      setAuthToken(next.accessToken)
+      setSession(next)
+    } catch (err) {
+      setSignInError(mapPasswordAuthError(err, 'login'))
+    }
+  }
+
+  const registerWithPassword = async (nombre: string, email: string, password: string) => {
+    setSignInError(null)
+    try {
+      const { access_token } = await apiClient.post<{ access_token: string; token_type: string }>(
+        '/auth/register',
+        { nombre, email, password },
+      )
+      const next: StoredSession = { accessToken: access_token, user: { email, name: nombre } }
+      saveStoredSession(next)
+      setAuthToken(next.accessToken)
+      setSession(next)
+    } catch (err) {
+      setSignInError(mapPasswordAuthError(err, 'register'))
+    }
+  }
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user: session?.user ?? null,
@@ -89,6 +144,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInError,
       signInWithGoogleCredential,
       signInAsDevUser,
+      signInWithPassword,
+      registerWithPassword,
       signOut: clearSession,
     }),
     [session, signInError],

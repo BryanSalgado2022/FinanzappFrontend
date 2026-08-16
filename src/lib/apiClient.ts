@@ -36,8 +36,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${BASE_URL}${path}`, { ...init, headers })
 
   if (response.status === 401) {
+    const body = await response.json().catch(() => null)
     onUnauthorized?.()
-    throw new ApiError(401, 'Not authenticated')
+    throw new ApiError(401, body?.detail ? String(body.detail) : 'Not authenticated')
   }
 
   if (!response.ok) {
