@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Landmark, Receipt, TrendingUp, X } from 'lucide-react'
+import { MoneyInput } from './MoneyInput'
 import { useCreateConcept } from '../hooks/useConcepts'
 import type { PeriodoTasa, TipoConcepto } from '../types'
 
@@ -97,11 +98,10 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
 
         {tipo === 'deuda' && (
           <>
-            <input
+            <MoneyInput
               placeholder="Valor total de la deuda"
-              inputMode="decimal"
               value={valorTotal}
-              onChange={(e) => setValorTotal(e.target.value)}
+              onChange={setValorTotal}
               className={inputClass}
             />
 
@@ -139,13 +139,12 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
         )}
 
         {!tieneAmortizacion && (
-          <input
+          <MoneyInput
             placeholder={
               tipo === 'ingreso' ? 'Monto esperado este mes (opcional)' : 'Monto planeado este mes (opcional)'
             }
-            inputMode="decimal"
             value={montoPlaneado}
-            onChange={(e) => setMontoPlaneado(e.target.value)}
+            onChange={setMontoPlaneado}
             className={inputClass}
           />
         )}

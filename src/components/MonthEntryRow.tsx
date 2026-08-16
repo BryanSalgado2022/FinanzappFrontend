@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Check } from 'lucide-react'
+import { Check, Circle } from 'lucide-react'
+import { MoneyInput } from './MoneyInput'
 import { formatCOP, monthName } from '../lib/format'
 import type { EntradaMensual, TipoConcepto } from '../types'
 
@@ -18,14 +19,27 @@ interface MonthEntryRowProps {
 // "Pagado"/"monto pagado" only makes sense for money going out (deuda,
 // gasto_fijo). For an ingreso, the same field means "¿ya lo recibiste?" -
 // same underlying data, different label so it reads correctly either way.
+// "pendiente" is phrased as the action the button performs, not the current
+// state ("Marcar como pagado" not "Pendiente") - a static state label reads
+// as inert text, not as something clickable.
 const LABELS: Record<TipoConcepto, { planeado: string; real: string; estado: string; pendiente: string }> = {
-  deuda: { planeado: 'Monto planeado', real: 'Monto pagado (opcional)', estado: 'Pagado', pendiente: 'Pendiente' },
-  gasto_fijo: { planeado: 'Monto planeado', real: 'Monto pagado (opcional)', estado: 'Pagado', pendiente: 'Pendiente' },
+  deuda: {
+    planeado: 'Monto planeado',
+    real: 'Monto pagado (opcional)',
+    estado: 'Pagado',
+    pendiente: 'Marcar como pagado',
+  },
+  gasto_fijo: {
+    planeado: 'Monto planeado',
+    real: 'Monto pagado (opcional)',
+    estado: 'Pagado',
+    pendiente: 'Marcar como pagado',
+  },
   ingreso: {
     planeado: 'Monto esperado',
     real: 'Monto recibido (opcional)',
     estado: 'Recibido',
-    pendiente: 'Pendiente',
+    pendiente: 'Marcar como recibido',
   },
 }
 
@@ -78,13 +92,17 @@ function PagadoToggle({
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className={`flex w-full items-center justify-center gap-2 rounded-lg border py-2 text-sm font-medium transition-all active:scale-[0.98] ${
+      className={`flex w-full items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all active:scale-[0.98] ${
         checked
           ? 'border-accent bg-accent text-paper-raised shadow-sm'
-          : 'border-line bg-paper text-ink-muted hover:border-warn hover:text-warn'
+          : 'border-dashed border-line bg-paper text-ink-muted hover:border-warn hover:bg-warn-soft/40 hover:text-warn'
       }`}
     >
-      {checked && <Check className="h-4 w-4" strokeWidth={3} />}
+      {checked ? (
+        <Check className="h-4 w-4" strokeWidth={3} />
+      ) : (
+        <Circle className="h-4 w-4" strokeWidth={2} />
+      )}
       {checked ? labelOn : labelOff}
     </button>
   )
@@ -147,18 +165,16 @@ export function MonthEntryRow({
         ) : (
           <div className="space-y-2 rounded-xl border border-line bg-paper-raised p-3">
             <p className="text-xs font-medium text-ink-muted">{monthName(mes)}</p>
-            <input
+            <MoneyInput
               placeholder={labels.planeado}
-              inputMode="decimal"
               value={montoPlaneado}
-              onChange={(e) => setMontoPlaneado(e.target.value)}
+              onChange={setMontoPlaneado}
               className={inputClass}
             />
-            <input
+            <MoneyInput
               placeholder={labels.real}
-              inputMode="decimal"
               value={montoPagado}
-              onChange={(e) => setMontoPagado(e.target.value)}
+              onChange={setMontoPagado}
               className={inputClass}
             />
             <PagadoToggle
