@@ -26,7 +26,7 @@ export function AnnualTrendChart({ trend }: { trend: AnnualTrend }) {
   return (
     <div className="h-56 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
+        <LineChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
           <CartesianGrid stroke={viz.grid} vertical={false} />
           <XAxis
             dataKey="mes"
