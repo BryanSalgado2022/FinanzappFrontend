@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Check } from 'lucide-react'
 import { formatCOP, monthName } from '../lib/format'
 import type { EntradaMensual, TipoConcepto } from '../types'
 
@@ -7,6 +8,9 @@ interface MonthEntryRowProps {
   isCurrentMonth: boolean
   entry: EntradaMensual | undefined
   tipo: TipoConcepto
+  isEditing: boolean
+  onStartEdit: () => void
+  onStopEdit: () => void
   onSave: (input: { monto_planeado: string; monto_pagado?: string; pagado?: boolean }) => void
   saving: boolean
 }
@@ -14,25 +18,28 @@ interface MonthEntryRowProps {
 // "Pagado"/"monto pagado" only makes sense for money going out (deuda,
 // gasto_fijo). For an ingreso, the same field means "¿ya lo recibiste?" -
 // same underlying data, different label so it reads correctly either way.
-const LABELS: Record<TipoConcepto, { planeado: string; real: string; estado: string }> = {
-  deuda: { planeado: 'Monto planeado', real: 'Monto pagado (opcional)', estado: 'Pagado' },
-  gasto_fijo: { planeado: 'Monto planeado', real: 'Monto pagado (opcional)', estado: 'Pagado' },
-  ingreso: { planeado: 'Monto esperado', real: 'Monto recibido (opcional)', estado: 'Recibido' },
+const LABELS: Record<TipoConcepto, { planeado: string; real: string; estado: string; pendiente: string }> = {
+  deuda: { planeado: 'Monto planeado', real: 'Monto pagado (opcional)', estado: 'Pagado', pendiente: 'Pendiente' },
+  gasto_fijo: { planeado: 'Monto planeado', real: 'Monto pagado (opcional)', estado: 'Pagado', pendiente: 'Pendiente' },
+  ingreso: {
+    planeado: 'Monto esperado',
+    real: 'Monto recibido (opcional)',
+    estado: 'Recibido',
+    pendiente: 'Pendiente',
+  },
 }
 
 const inputClass =
   'w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
 
 function Node({ entry, isCurrentMonth }: { entry: EntradaMensual | undefined; isCurrentMonth: boolean }) {
-  const base = 'relative z-10 flex shrink-0 items-center justify-center rounded-full'
+  const base = 'relative z-10 flex shrink-0 items-center justify-center rounded-full transition-transform'
   const size = isCurrentMonth ? 'h-7 w-7' : 'h-5 w-5'
 
   if (entry?.pagado) {
     return (
-      <span className={`${base} ${size} bg-accent text-[11px] text-paper-raised`}>
-        <svg viewBox="0 0 12 12" className="h-3 w-3" fill="none">
-          <path d="M2 6.2l2.6 2.6L10 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+      <span className={`${base} ${size} scale-100 bg-accent text-paper-raised`}>
+        <Check className="h-3.5 w-3.5" strokeWidth={3} />
       </span>
     )
   }
@@ -54,9 +61,47 @@ function Node({ entry, isCurrentMonth }: { entry: EntradaMensual | undefined; is
   )
 }
 
-export function MonthEntryRow({ mes, isCurrentMonth, entry, tipo, onSave, saving }: MonthEntryRowProps) {
+/** A pill toggle (not a native checkbox) so marking something paid/received
+ * feels like a deliberate, satisfying action rather than a form checkbox. */
+function PagadoToggle({
+  checked,
+  onChange,
+  labelOn,
+  labelOff,
+}: {
+  checked: boolean
+  onChange: (value: boolean) => void
+  labelOn: string
+  labelOff: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`flex w-full items-center justify-center gap-2 rounded-lg border py-2 text-sm font-medium transition-all active:scale-[0.98] ${
+        checked
+          ? 'border-accent bg-accent text-paper-raised shadow-sm'
+          : 'border-line bg-paper text-ink-muted hover:border-warn hover:text-warn'
+      }`}
+    >
+      {checked && <Check className="h-4 w-4" strokeWidth={3} />}
+      {checked ? labelOn : labelOff}
+    </button>
+  )
+}
+
+export function MonthEntryRow({
+  mes,
+  isCurrentMonth,
+  entry,
+  tipo,
+  isEditing,
+  onStartEdit,
+  onStopEdit,
+  onSave,
+  saving,
+}: MonthEntryRowProps) {
   const labels = LABELS[tipo]
-  const [editing, setEditing] = useState(false)
   const [montoPlaneado, setMontoPlaneado] = useState(entry?.monto_planeado ?? '')
   const [montoPagado, setMontoPagado] = useState(entry?.monto_pagado ?? '')
   const [pagado, setPagado] = useState(entry?.pagado ?? false)
@@ -65,7 +110,7 @@ export function MonthEntryRow({ mes, isCurrentMonth, entry, tipo, onSave, saving
     setMontoPlaneado(entry?.monto_planeado ?? '')
     setMontoPagado(entry?.monto_pagado ?? '')
     setPagado(entry?.pagado ?? false)
-    setEditing(true)
+    onStartEdit()
   }
 
   const handleSave = () => {
@@ -74,7 +119,7 @@ export function MonthEntryRow({ mes, isCurrentMonth, entry, tipo, onSave, saving
       monto_pagado: montoPagado || undefined,
       pagado,
     })
-    setEditing(false)
+    onStopEdit()
   }
 
   return (
@@ -84,7 +129,7 @@ export function MonthEntryRow({ mes, isCurrentMonth, entry, tipo, onSave, saving
       </div>
 
       <div className={`min-w-0 flex-1 ${isCurrentMonth ? 'pb-1' : ''}`}>
-        {!editing ? (
+        {!isEditing ? (
           <button
             type="button"
             onClick={startEditing}
@@ -116,19 +161,16 @@ export function MonthEntryRow({ mes, isCurrentMonth, entry, tipo, onSave, saving
               onChange={(e) => setMontoPagado(e.target.value)}
               className={inputClass}
             />
-            <label className="flex items-center gap-2 text-sm text-ink-muted">
-              <input
-                type="checkbox"
-                checked={pagado}
-                onChange={(e) => setPagado(e.target.checked)}
-                className="accent-accent"
-              />
-              {labels.estado}
-            </label>
+            <PagadoToggle
+              checked={pagado}
+              onChange={setPagado}
+              labelOn={labels.estado}
+              labelOff={labels.pendiente}
+            />
             <div className="flex justify-end gap-2 pt-1">
               <button
                 type="button"
-                onClick={() => setEditing(false)}
+                onClick={onStopEdit}
                 className="rounded-full px-3 py-1.5 text-sm text-ink-muted hover:text-ink"
               >
                 Cancelar

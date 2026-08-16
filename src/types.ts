@@ -12,6 +12,7 @@ export interface Concepto {
   periodo_tasa: PeriodoTasa | null
   numero_cuotas: number | null
   cuota_fija: string | null
+  duracion_meses: number | null
   activo: boolean
 }
 
@@ -26,6 +27,9 @@ export interface ConceptoCreateInput {
   tasa_interes?: string
   periodo_tasa?: PeriodoTasa
   numero_cuotas?: number
+  // Fixed duration (gasto_fijo/ingreso only, optional, immutable): generates
+  // exactly this many months at creation instead of the open-ended behavior.
+  duracion_meses?: number
 }
 
 export interface ConceptoUpdateInput {

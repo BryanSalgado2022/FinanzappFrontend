@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react'
+import { Landmark, Receipt, TrendingUp, X } from 'lucide-react'
 import { useCreateConcept } from '../hooks/useConcepts'
 import type { PeriodoTasa, TipoConcepto } from '../types'
 
-const TIPO_OPTIONS: { value: TipoConcepto; label: string }[] = [
-  { value: 'gasto_fijo', label: 'Gasto fijo' },
-  { value: 'deuda', label: 'Deuda' },
-  { value: 'ingreso', label: 'Ingreso' },
+const TIPO_OPTIONS: { value: TipoConcepto; label: string; Icon: typeof Landmark }[] = [
+  { value: 'gasto_fijo', label: 'Gasto fijo', Icon: Receipt },
+  { value: 'deuda', label: 'Deuda', Icon: Landmark },
+  { value: 'ingreso', label: 'Ingreso', Icon: TrendingUp },
 ]
 
 const inputClass =
@@ -20,9 +21,11 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
   const [tasaInteres, setTasaInteres] = useState('')
   const [periodoTasa, setPeriodoTasa] = useState<PeriodoTasa>('mensual')
   const [numeroCuotas, setNumeroCuotas] = useState('')
+  const [duracionMeses, setDuracionMeses] = useState('')
   const createConcept = useCreateConcept()
 
   const tieneAmortizacion = tipo === 'deuda' && tasaInteres !== '' && numeroCuotas !== ''
+  const puedeTenerDuracion = tipo === 'gasto_fijo' || tipo === 'ingreso'
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
@@ -36,6 +39,8 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
         tasa_interes: tieneAmortizacion ? tasaInteres : undefined,
         periodo_tasa: tieneAmortizacion ? periodoTasa : undefined,
         numero_cuotas: tieneAmortizacion ? Number(numeroCuotas) : undefined,
+        duracion_meses:
+          puedeTenerDuracion && duracionMeses !== '' ? Number(duracionMeses) : undefined,
       },
       { onSuccess: onDone },
     )
@@ -47,7 +52,17 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
         onSubmit={handleSubmit}
         className="max-h-[90svh] w-full max-w-sm space-y-3.5 overflow-y-auto rounded-t-3xl border border-line bg-paper-raised p-6 shadow-xl sm:rounded-3xl"
       >
-        <h2 className="font-display text-xl font-medium text-ink">Nuevo concepto</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-xl font-medium text-ink">Nuevo concepto</h2>
+          <button
+            type="button"
+            onClick={onDone}
+            aria-label="Cerrar"
+            className="flex h-7 w-7 items-center justify-center rounded-full text-ink-muted hover:bg-paper hover:text-ink"
+          >
+            <X className="h-4 w-4" strokeWidth={2} />
+          </button>
+        </div>
 
         <input
           required
@@ -63,12 +78,11 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
               key={option.value}
               type="button"
               onClick={() => setTipo(option.value)}
-              className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition ${
-                tipo === option.value
-                  ? 'bg-ink text-paper'
-                  : 'text-ink-muted hover:text-ink'
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition ${
+                tipo === option.value ? 'bg-ink text-paper' : 'text-ink-muted hover:text-ink'
               }`}
             >
+              <option.Icon className="h-3.5 w-3.5" strokeWidth={2} />
               {option.label}
             </button>
           ))}
@@ -126,12 +140,31 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
 
         {!tieneAmortizacion && (
           <input
-            placeholder="Monto planeado este mes (opcional)"
+            placeholder={
+              tipo === 'ingreso' ? 'Monto esperado este mes (opcional)' : 'Monto planeado este mes (opcional)'
+            }
             inputMode="decimal"
             value={montoPlaneado}
             onChange={(e) => setMontoPlaneado(e.target.value)}
             className={inputClass}
           />
+        )}
+
+        {puedeTenerDuracion && (
+          <div>
+            <input
+              placeholder="Duración en meses (opcional — indefinido si se deja vacío)"
+              inputMode="numeric"
+              value={duracionMeses}
+              onChange={(e) => setDuracionMeses(e.target.value)}
+              className={inputClass}
+            />
+            <p className="mt-1 px-1 text-xs text-ink-muted">
+              {duracionMeses
+                ? `Se generarán exactamente ${duracionMeses} meses y luego se detiene.`
+                : 'Vacío = se repite indefinidamente cada mes, como hoy.'}
+            </p>
+          </div>
         )}
 
         {createConcept.isError && (

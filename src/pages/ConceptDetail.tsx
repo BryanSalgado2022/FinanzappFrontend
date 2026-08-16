@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { ChevronLeft, ChevronRight, Pencil, CheckCircle2, Trash2 } from 'lucide-react'
 import { Header } from '../components/Header'
 import { MonthEntryRow } from '../components/MonthEntryRow'
 import { ProgressRing } from '../components/ProgressRing'
@@ -27,6 +28,8 @@ export function ConceptDetail() {
   const [editingHeader, setEditingHeader] = useState(false)
   const [nombreDraft, setNombreDraft] = useState('')
   const [categoriaDraft, setCategoriaDraft] = useState('')
+  // Accordion: only one month row can be in edit mode across the whole year.
+  const [editingMes, setEditingMes] = useState<number | null>(null)
 
   const concept = useConcept(conceptoId)
   const entries = useConceptEntries(conceptoId)
@@ -64,7 +67,7 @@ export function ConceptDetail() {
     <div className="min-h-svh bg-paper">
       <Header />
 
-      <main className="mx-auto max-w-xl space-y-8 p-5 pb-24">
+      <main className="mx-auto max-w-xl space-y-8 p-5 pb-24 lg:max-w-3xl">
         <div className="rounded-3xl border border-line bg-paper-raised p-6">
           {!editingHeader ? (
             <>
@@ -83,8 +86,9 @@ export function ConceptDetail() {
                 <button
                   type="button"
                   onClick={startEditingHeader}
-                  className="shrink-0 text-sm text-ink-muted underline decoration-line underline-offset-4 hover:text-ink"
+                  className="flex shrink-0 items-center gap-1.5 text-sm text-ink-muted underline decoration-line underline-offset-4 hover:text-ink"
                 >
+                  <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
                   Editar
                 </button>
               </div>
@@ -129,17 +133,32 @@ export function ConceptDetail() {
                 </div>
               )}
 
+              {c.duracion_meses !== null && (
+                <div className="mt-4 rounded-xl bg-paper px-3 py-2.5 text-center">
+                  <p className="text-xs text-ink-muted">Duración fija</p>
+                  <p className="font-tabular text-sm font-semibold text-ink">
+                    {c.duracion_meses} {c.duracion_meses === 1 ? 'mes' : 'meses'}
+                  </p>
+                </div>
+              )}
+
               <div className="mt-5 flex gap-4 border-t border-line pt-4 text-sm">
                 {c.activo && (
                   <button
                     type="button"
                     onClick={handleFinish}
-                    className="text-ink-muted hover:text-ink"
+                    className="flex items-center gap-1.5 text-ink-muted hover:text-ink"
                   >
+                    <CheckCircle2 className="h-4 w-4" strokeWidth={2} />
                     Marcar como terminado
                   </button>
                 )}
-                <button type="button" onClick={handleDelete} className="text-danger hover:opacity-80">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="flex items-center gap-1.5 text-danger hover:opacity-80"
+                >
+                  <Trash2 className="h-4 w-4" strokeWidth={2} />
                   Eliminar
                 </button>
               </div>
@@ -186,17 +205,19 @@ export function ConceptDetail() {
           <button
             type="button"
             onClick={() => setAnio((y) => y - 1)}
+            aria-label="Año anterior"
             className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition hover:bg-accent-soft hover:text-ink"
           >
-            ‹
+            <ChevronLeft className="h-4 w-4" strokeWidth={2} />
           </button>
           <span className="min-w-16 text-center font-display text-lg font-medium text-ink">{anio}</span>
           <button
             type="button"
             onClick={() => setAnio((y) => y + 1)}
+            aria-label="Año siguiente"
             className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition hover:bg-accent-soft hover:text-ink"
           >
-            ›
+            <ChevronRight className="h-4 w-4" strokeWidth={2} />
           </button>
         </div>
 
@@ -215,6 +236,9 @@ export function ConceptDetail() {
                     isCurrentMonth={anio === now.getFullYear() && mes === now.getMonth() + 1}
                     entry={entriesByMonth.get(mes)}
                     tipo={c.tipo}
+                    isEditing={editingMes === mes}
+                    onStartEdit={() => setEditingMes(mes)}
+                    onStopEdit={() => setEditingMes(null)}
                     saving={upsertEntry.isPending}
                     onSave={(input) => upsertEntry.mutate({ anio, mes, input })}
                   />
