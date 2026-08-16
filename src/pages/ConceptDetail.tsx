@@ -28,6 +28,7 @@ export function ConceptDetail() {
   const [editingHeader, setEditingHeader] = useState(false)
   const [nombreDraft, setNombreDraft] = useState('')
   const [categoriaDraft, setCategoriaDraft] = useState('')
+  const [diaVencimientoDraft, setDiaVencimientoDraft] = useState('')
   // Accordion: only one month row can be in edit mode across the whole year.
   const [editingMes, setEditingMes] = useState<number | null>(null)
 
@@ -53,10 +54,12 @@ export function ConceptDetail() {
   const percentPaid = isDebt
     ? Math.round(((Number(c.valor_total) - Number(c.saldo_restante)) / Number(c.valor_total)) * 100)
     : 0
+  const puedeTenerDiaVencimiento = c.tipo === 'deuda' || c.tipo === 'gasto_fijo'
 
   const startEditingHeader = () => {
     setNombreDraft(c.nombre)
     setCategoriaDraft(c.categoria ?? '')
+    setDiaVencimientoDraft(c.dia_vencimiento !== null ? String(c.dia_vencimiento) : '')
     setEditingHeader(true)
   }
 
@@ -142,6 +145,15 @@ export function ConceptDetail() {
                 </div>
               )}
 
+              {c.dia_vencimiento !== null && (
+                <div className="mt-4 rounded-xl bg-paper px-3 py-2.5 text-center">
+                  <p className="text-xs text-ink-muted">Vencimiento</p>
+                  <p className="font-tabular text-sm font-semibold text-ink">
+                    Vence el día {c.dia_vencimiento}
+                  </p>
+                </div>
+              )}
+
               <div className="mt-5 flex gap-4 border-t border-line pt-4 text-sm">
                 {c.activo && (
                   <button
@@ -176,6 +188,15 @@ export function ConceptDetail() {
                 onChange={(e) => setCategoriaDraft(e.target.value)}
                 className={inputClass}
               />
+              {puedeTenerDiaVencimiento && (
+                <input
+                  placeholder="Día de vencimiento (opcional, 1-28)"
+                  inputMode="numeric"
+                  value={diaVencimientoDraft}
+                  onChange={(e) => setDiaVencimientoDraft(e.target.value)}
+                  className={inputClass}
+                />
+              )}
               <div className="flex justify-end gap-2">
                 <button
                   type="button"
@@ -188,7 +209,14 @@ export function ConceptDetail() {
                   type="button"
                   onClick={() =>
                     updateConcept.mutate(
-                      { nombre: nombreDraft, categoria: categoriaDraft || undefined },
+                      {
+                        nombre: nombreDraft,
+                        categoria: categoriaDraft || undefined,
+                        dia_vencimiento:
+                          puedeTenerDiaVencimiento && diaVencimientoDraft !== ''
+                            ? Math.min(28, Math.max(1, Number(diaVencimientoDraft)))
+                            : undefined,
+                      },
                       { onSuccess: () => setEditingHeader(false) },
                     )
                   }

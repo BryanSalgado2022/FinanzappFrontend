@@ -13,6 +13,7 @@ export interface Concepto {
   numero_cuotas: number | null
   cuota_fija: string | null
   duracion_meses: number | null
+  dia_vencimiento: number | null
   activo: boolean
 }
 
@@ -30,6 +31,9 @@ export interface ConceptoCreateInput {
   // Fixed duration (gasto_fijo/ingreso only, optional, immutable): generates
   // exactly this many months at creation instead of the open-ended behavior.
   duracion_meses?: number
+  // Due day (1-28, deuda/gasto_fijo only, optional). Unlike the fields above,
+  // this stays editable after creation - see ConceptoUpdateInput.
+  dia_vencimiento?: number
 }
 
 export interface ConceptoUpdateInput {
@@ -37,6 +41,7 @@ export interface ConceptoUpdateInput {
   categoria?: string
   activo?: boolean
   valor_total?: string
+  dia_vencimiento?: number
 }
 
 export interface EntradaMensual {
@@ -47,6 +52,7 @@ export interface EntradaMensual {
   monto_planeado: string
   monto_pagado: string | null
   pagado: boolean
+  vencida: boolean
 }
 
 export interface EntradaMensualInput {

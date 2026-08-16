@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, Circle } from 'lucide-react'
+import { AlertTriangle, Check, Circle } from 'lucide-react'
 import { MoneyInput } from './MoneyInput'
 import { formatCOP, monthName } from '../lib/format'
 import type { EntradaMensual, TipoConcepto } from '../types'
@@ -54,6 +54,18 @@ function Node({ entry, isCurrentMonth }: { entry: EntradaMensual | undefined; is
     return (
       <span className={`${base} ${size} scale-100 bg-accent text-paper-raised`}>
         <Check className="h-3.5 w-3.5" strokeWidth={3} />
+      </span>
+    )
+  }
+
+  if (entry?.vencida) {
+    return (
+      <span
+        className={`${base} ${size} border-2 border-danger bg-danger-soft text-danger ${
+          isCurrentMonth ? 'ring-4 ring-danger-soft' : ''
+        }`}
+      >
+        <AlertTriangle className="h-3 w-3" strokeWidth={2.5} />
       </span>
     )
   }

@@ -23,10 +23,12 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
   const [periodoTasa, setPeriodoTasa] = useState<PeriodoTasa>('mensual')
   const [numeroCuotas, setNumeroCuotas] = useState('')
   const [duracionMeses, setDuracionMeses] = useState('')
+  const [diaVencimiento, setDiaVencimiento] = useState('')
   const createConcept = useCreateConcept()
 
   const tieneAmortizacion = tipo === 'deuda' && tasaInteres !== '' && numeroCuotas !== ''
   const puedeTenerDuracion = tipo === 'gasto_fijo' || tipo === 'ingreso'
+  const puedeTenerDiaVencimiento = tipo === 'deuda' || tipo === 'gasto_fijo'
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
@@ -42,6 +44,10 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
         numero_cuotas: tieneAmortizacion ? Number(numeroCuotas) : undefined,
         duracion_meses:
           puedeTenerDuracion && duracionMeses !== '' ? Number(duracionMeses) : undefined,
+        dia_vencimiento:
+          puedeTenerDiaVencimiento && diaVencimiento !== ''
+            ? Math.min(28, Math.max(1, Number(diaVencimiento)))
+            : undefined,
       },
       { onSuccess: onDone },
     )
@@ -162,6 +168,23 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
               {duracionMeses
                 ? `Se generarán exactamente ${duracionMeses} meses y luego se detiene.`
                 : 'Vacío = se repite indefinidamente cada mes, como hoy.'}
+            </p>
+          </div>
+        )}
+
+        {puedeTenerDiaVencimiento && (
+          <div>
+            <input
+              placeholder="Día de vencimiento (opcional, 1-28)"
+              inputMode="numeric"
+              value={diaVencimiento}
+              onChange={(e) => setDiaVencimiento(e.target.value)}
+              className={inputClass}
+            />
+            <p className="mt-1 px-1 text-xs text-ink-muted">
+              {diaVencimiento
+                ? 'Se usará para marcar cuotas vencidas si no las has pagado a tiempo.'
+                : 'Vacío = sin fecha de vencimiento, como hoy.'}
             </p>
           </div>
         )}
