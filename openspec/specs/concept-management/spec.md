@@ -17,7 +17,7 @@ The system SHALL display, for a selected concept, its name, type (debt, fixed ex
 - **THEN** the header does not display a remaining-balance figure
 
 ### Requirement: Twelve-month entry list
-The system SHALL display the concept's monthly entries for a selectable year as a list (not a spreadsheet-style grid), each entry showing its month, planned amount, and paid/pending status, with the current calendar month visually distinguished from past and future months. When the selected year is the current calendar year, months that have already passed SHALL be collapsed behind a single control by default, while the current month and future months SHALL always be shown in full; when the selected year is not the current calendar year, all twelve months SHALL be shown in full regardless of the collapse default.
+The system SHALL display the concept's monthly entries for a selectable year as a list (not a spreadsheet-style grid) grouped into quarters, each entry showing its month, planned amount, and paid/pending status, with the current calendar month visually distinguished from past and future months. When the selected year is the current calendar year, any quarter falling entirely in the past SHALL be collapsed behind its own control by default, independently of other quarters; the quarter containing the current month SHALL always be shown in full (including any past months within it), and any fully future quarter SHALL always be shown in full. When the selected year is not the current calendar year, all twelve months SHALL be shown in full regardless of the collapse default.
 
 #### Scenario: Month with no entry yet
 - **WHEN** a given month has no monthly entry recorded for the concept
@@ -27,13 +27,13 @@ The system SHALL display the concept's monthly entries for a selectable year as 
 - **WHEN** the user selects a year other than the current one
 - **THEN** the list updates to show that year's twelve monthly entries for the concept
 
-#### Scenario: Past months of the current year are collapsed by default
-- **WHEN** the user opens the current year's entry list and it contains one or more months that have already passed
-- **THEN** those past months are hidden behind a single control, while the current month and any future months are shown
+#### Scenario: Fully past quarters of the current year are collapsed by default
+- **WHEN** the user opens the current year's entry list and it contains one or more quarters that have already fully passed
+- **THEN** each such quarter is collapsed behind its own control, while the quarter containing the current month and any fully future quarters are shown in full
 
-#### Scenario: Expanding reveals past months
-- **WHEN** the user activates the "show past months" control
-- **THEN** the previously hidden past months of the current year become visible in the list
+#### Scenario: Expanding and collapsing a quarter is independent per quarter
+- **WHEN** the user activates a collapsed past quarter's control
+- **THEN** that quarter's months become visible without affecting the collapsed/expanded state of any other quarter, and activating it again re-collapses that same quarter
 
 #### Scenario: A past year is never collapsed
 - **WHEN** the user navigates to a year before the current calendar year
