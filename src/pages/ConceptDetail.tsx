@@ -31,9 +31,10 @@ export function ConceptDetail() {
   const [diaVencimientoDraft, setDiaVencimientoDraft] = useState('')
   // Accordion: only one month row can be in edit mode across the whole year.
   const [editingMes, setEditingMes] = useState<number | null>(null)
-  // Past months of the current year start collapsed - resets whenever the
-  // selected year changes so it doesn't leak a stale "expanded" state in.
-  const [mostrarMesesPasados, setMostrarMesesPasados] = useState(false)
+  // Fully-past quarters of the current year start collapsed, independently
+  // toggleable per quarter - resets whenever the selected year changes so it
+  // doesn't leak a stale "expanded" state in.
+  const [trimestresExpandidos, setTrimestresExpandidos] = useState<Set<number>>(new Set())
 
   const concept = useConcept(conceptoId)
   const entries = useConceptEntries(conceptoId)
@@ -60,17 +61,28 @@ export function ConceptDetail() {
   const puedeTenerDiaVencimiento = c.tipo === 'deuda' || c.tipo === 'gasto_fijo'
 
   const esAnioActual = anio === now.getFullYear()
-  const esMesPasado = (mes: number) => esAnioActual && mes < now.getMonth() + 1
-  const hayMesesPasados = esAnioActual && now.getMonth() + 1 > 1
+  const mesActual = now.getMonth() + 1
   const creationYear = new Date(c.created_at).getFullYear()
   const puedeIrAAnioAnterior = anio > creationYear
 
+  const toggleTrimestre = (quarter: number) => {
+    setTrimestresExpandidos((prev) => {
+      const next = new Set(prev)
+      if (next.has(quarter)) {
+        next.delete(quarter)
+      } else {
+        next.add(quarter)
+      }
+      return next
+    })
+  }
+
   const goToPreviousYear = () => {
-    setMostrarMesesPasados(false)
+    setTrimestresExpandidos(new Set())
     setAnio((y) => y - 1)
   }
   const goToNextYear = () => {
-    setMostrarMesesPasados(false)
+    setTrimestresExpandidos(new Set())
     setAnio((y) => y + 1)
   }
 
@@ -270,29 +282,35 @@ export function ConceptDetail() {
           </button>
         </div>
 
-        {esAnioActual && hayMesesPasados && !mostrarMesesPasados && (
-          <button
-            type="button"
-            onClick={() => setMostrarMesesPasados(true)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-line py-2 text-sm text-ink-muted transition hover:border-accent hover:text-ink"
-          >
-            <ChevronDown className="h-3.5 w-3.5" strokeWidth={2} />
-            Mostrar meses anteriores
-          </button>
-        )}
-
         <div className="space-y-6">
           {QUARTERS.map(({ quarter, months }) => {
-            const mesesVisibles = months.filter((mes) => mostrarMesesPasados || !esMesPasado(mes))
-            if (mesesVisibles.length === 0) return null
+            const esTrimestrePasado = esAnioActual && months.every((mes) => mes < mesActual)
+            const expandido = trimestresExpandidos.has(quarter)
+            const colapsado = esTrimestrePasado && !expandido
+
             return (
               <div key={quarter}>
-                <p className="mb-1 pl-9 text-xs font-medium tracking-wide text-ink-muted uppercase">
-                  {quarterLabel(quarter)}
-                </p>
+                {esTrimestrePasado ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleTrimestre(quarter)}
+                    className="mb-1 flex items-center gap-1 pl-9 text-xs font-medium tracking-wide text-ink-muted uppercase transition hover:text-ink"
+                  >
+                    <ChevronDown
+                      className={`h-3 w-3 shrink-0 transition-transform ${expandido ? '' : '-rotate-90'}`}
+                      strokeWidth={2}
+                    />
+                    {quarterLabel(quarter)}
+                  </button>
+                ) : (
+                  <p className="mb-1 pl-9 text-xs font-medium tracking-wide text-ink-muted uppercase">
+                    {quarterLabel(quarter)}
+                  </p>
+                )}
+                {!colapsado && (
                 <ul className="relative">
                   <div className="absolute top-2 bottom-2 left-[22px] w-px bg-line" aria-hidden />
-                  {mesesVisibles.map((mes) => (
+                  {months.map((mes) => (
                     <MonthEntryRow
                       key={mes}
                       mes={mes}
@@ -307,6 +325,7 @@ export function ConceptDetail() {
                     />
                   ))}
                 </ul>
+                )}
               </div>
             )
           })}
