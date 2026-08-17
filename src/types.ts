@@ -15,6 +15,7 @@ export interface Concepto {
   duracion_meses: number | null
   dia_vencimiento: number | null
   activo: boolean
+  created_at: string
 }
 
 export interface ConceptoCreateInput {

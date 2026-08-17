@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Pencil, CheckCircle2, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Pencil, CheckCircle2, Trash2 } from 'lucide-react'
 import { Header } from '../components/Header'
 import { MonthEntryRow } from '../components/MonthEntryRow'
 import { ProgressRing } from '../components/ProgressRing'
@@ -31,6 +31,9 @@ export function ConceptDetail() {
   const [diaVencimientoDraft, setDiaVencimientoDraft] = useState('')
   // Accordion: only one month row can be in edit mode across the whole year.
   const [editingMes, setEditingMes] = useState<number | null>(null)
+  // Past months of the current year start collapsed - resets whenever the
+  // selected year changes so it doesn't leak a stale "expanded" state in.
+  const [mostrarMesesPasados, setMostrarMesesPasados] = useState(false)
 
   const concept = useConcept(conceptoId)
   const entries = useConceptEntries(conceptoId)
@@ -55,6 +58,21 @@ export function ConceptDetail() {
     ? Math.round(((Number(c.valor_total) - Number(c.saldo_restante)) / Number(c.valor_total)) * 100)
     : 0
   const puedeTenerDiaVencimiento = c.tipo === 'deuda' || c.tipo === 'gasto_fijo'
+
+  const esAnioActual = anio === now.getFullYear()
+  const esMesPasado = (mes: number) => esAnioActual && mes < now.getMonth() + 1
+  const hayMesesPasados = esAnioActual && now.getMonth() + 1 > 1
+  const creationYear = new Date(c.created_at).getFullYear()
+  const puedeIrAAnioAnterior = anio > creationYear
+
+  const goToPreviousYear = () => {
+    setMostrarMesesPasados(false)
+    setAnio((y) => y - 1)
+  }
+  const goToNextYear = () => {
+    setMostrarMesesPasados(false)
+    setAnio((y) => y + 1)
+  }
 
   const startEditingHeader = () => {
     setNombreDraft(c.nombre)
@@ -232,16 +250,19 @@ export function ConceptDetail() {
         <div className="flex items-center justify-center gap-1">
           <button
             type="button"
-            onClick={() => setAnio((y) => y - 1)}
+            onClick={goToPreviousYear}
+            disabled={!puedeIrAAnioAnterior}
             aria-label="Año anterior"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition hover:bg-accent-soft hover:text-ink"
+            className={`flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition ${
+              puedeIrAAnioAnterior ? 'hover:bg-accent-soft hover:text-ink' : 'cursor-not-allowed opacity-30'
+            }`}
           >
             <ChevronLeft className="h-4 w-4" strokeWidth={2} />
           </button>
           <span className="min-w-16 text-center font-display text-lg font-medium text-ink">{anio}</span>
           <button
             type="button"
-            onClick={() => setAnio((y) => y + 1)}
+            onClick={goToNextYear}
             aria-label="Año siguiente"
             className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition hover:bg-accent-soft hover:text-ink"
           >
@@ -249,31 +270,46 @@ export function ConceptDetail() {
           </button>
         </div>
 
+        {esAnioActual && hayMesesPasados && !mostrarMesesPasados && (
+          <button
+            type="button"
+            onClick={() => setMostrarMesesPasados(true)}
+            className="flex w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-line py-2 text-sm text-ink-muted transition hover:border-accent hover:text-ink"
+          >
+            <ChevronDown className="h-3.5 w-3.5" strokeWidth={2} />
+            Mostrar meses anteriores
+          </button>
+        )}
+
         <div className="space-y-6">
-          {QUARTERS.map(({ quarter, months }) => (
-            <div key={quarter}>
-              <p className="mb-1 pl-9 text-xs font-medium tracking-wide text-ink-muted uppercase">
-                {quarterLabel(quarter)}
-              </p>
-              <ul className="relative">
-                <div className="absolute top-2 bottom-2 left-[22px] w-px bg-line" aria-hidden />
-                {months.map((mes) => (
-                  <MonthEntryRow
-                    key={mes}
-                    mes={mes}
-                    isCurrentMonth={anio === now.getFullYear() && mes === now.getMonth() + 1}
-                    entry={entriesByMonth.get(mes)}
-                    tipo={c.tipo}
-                    isEditing={editingMes === mes}
-                    onStartEdit={() => setEditingMes(mes)}
-                    onStopEdit={() => setEditingMes(null)}
-                    saving={upsertEntry.isPending}
-                    onSave={(input) => upsertEntry.mutate({ anio, mes, input })}
-                  />
-                ))}
-              </ul>
-            </div>
-          ))}
+          {QUARTERS.map(({ quarter, months }) => {
+            const mesesVisibles = months.filter((mes) => mostrarMesesPasados || !esMesPasado(mes))
+            if (mesesVisibles.length === 0) return null
+            return (
+              <div key={quarter}>
+                <p className="mb-1 pl-9 text-xs font-medium tracking-wide text-ink-muted uppercase">
+                  {quarterLabel(quarter)}
+                </p>
+                <ul className="relative">
+                  <div className="absolute top-2 bottom-2 left-[22px] w-px bg-line" aria-hidden />
+                  {mesesVisibles.map((mes) => (
+                    <MonthEntryRow
+                      key={mes}
+                      mes={mes}
+                      isCurrentMonth={anio === now.getFullYear() && mes === now.getMonth() + 1}
+                      entry={entriesByMonth.get(mes)}
+                      tipo={c.tipo}
+                      isEditing={editingMes === mes}
+                      onStartEdit={() => setEditingMes(mes)}
+                      onStopEdit={() => setEditingMes(null)}
+                      saving={upsertEntry.isPending}
+                      onSave={(input) => upsertEntry.mutate({ anio, mes, input })}
+                    />
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
         </div>
       </main>
     </div>
