@@ -31,6 +31,7 @@ export function NewConceptForm({
   const [tasaInteres, setTasaInteres] = useState('')
   const [periodoTasa, setPeriodoTasa] = useState<PeriodoTasa>('mensual')
   const [numeroCuotas, setNumeroCuotas] = useState('')
+  const [cuotaInicial, setCuotaInicial] = useState('')
   const [duracionMeses, setDuracionMeses] = useState('')
   const [diaVencimiento, setDiaVencimiento] = useState('')
   const createConcept = useCreateConcept()
@@ -51,6 +52,7 @@ export function NewConceptForm({
         tasa_interes: tieneAmortizacion ? tasaInteres : undefined,
         periodo_tasa: tieneAmortizacion ? periodoTasa : undefined,
         numero_cuotas: tieneAmortizacion ? Number(numeroCuotas) : undefined,
+        cuota_inicial: tieneAmortizacion && cuotaInicial !== '' ? Number(cuotaInicial) : undefined,
         duracion_meses:
           puedeTenerDuracion && duracionMeses !== '' ? Number(duracionMeses) : undefined,
         dia_vencimiento:
@@ -156,6 +158,21 @@ export function NewConceptForm({
                 onChange={(e) => setNumeroCuotas(e.target.value)}
                 className={`${inputClass} mt-2`}
               />
+              {tieneAmortizacion && (
+                <div className="mt-2">
+                  <input
+                    placeholder="¿Ya vas pagando? ¿En qué cuota vas? (opcional)"
+                    inputMode="numeric"
+                    value={cuotaInicial}
+                    onChange={(e) => setCuotaInicial(e.target.value)}
+                    className={inputClass}
+                  />
+                  <p className="mt-1 px-1 text-xs text-ink-muted">
+                    Si ya llevas cuotas pagadas fuera de la app, indica en cuál vas — no se
+                    generarán las anteriores. Vacío = empieza en la cuota 1. No editable después.
+                  </p>
+                </div>
+              )}
             </div>
           </>
         )}

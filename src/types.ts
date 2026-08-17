@@ -12,6 +12,7 @@ export interface Concepto {
   periodo_tasa: PeriodoTasa | null
   numero_cuotas: number | null
   cuota_fija: string | null
+  cuota_inicial: number | null
   duracion_meses: number | null
   dia_vencimiento: number | null
   activo: boolean
@@ -29,6 +30,9 @@ export interface ConceptoCreateInput {
   tasa_interes?: string
   periodo_tasa?: PeriodoTasa
   numero_cuotas?: number
+  // Starting installment number (amortization only, optional, immutable) -
+  // for a debt the user already had and had been paying before this app.
+  cuota_inicial?: number
   // Fixed duration (gasto_fijo/ingreso only, optional, immutable): generates
   // exactly this many months at creation instead of the open-ended behavior.
   duracion_meses?: number

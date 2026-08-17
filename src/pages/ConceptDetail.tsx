@@ -166,6 +166,15 @@ export function ConceptDetail() {
                 </div>
               )}
 
+              {c.cuota_inicial !== null && c.cuota_inicial > 1 && (
+                <div className="mt-4 rounded-xl bg-paper px-3 py-2.5 text-center">
+                  <p className="text-xs text-ink-muted">Punto de partida</p>
+                  <p className="font-tabular text-sm font-semibold text-ink">
+                    Empezó en la cuota {c.cuota_inicial} de {c.numero_cuotas}
+                  </p>
+                </div>
+              )}
+
               {c.duracion_meses !== null && (
                 <div className="mt-4 rounded-xl bg-paper px-3 py-2.5 text-center">
                   <p className="text-xs text-ink-muted">Duración fija</p>
