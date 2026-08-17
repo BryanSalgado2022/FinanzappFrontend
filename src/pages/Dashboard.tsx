@@ -170,7 +170,9 @@ export function Dashboard() {
         </div>
       </main>
 
-      {showNewConcept && <NewConceptForm onDone={() => setShowNewConcept(false)} />}
+      {showNewConcept && (
+        <NewConceptForm anio={anio} mes={mes} onDone={() => setShowNewConcept(false)} />
+      )}
     </div>
   )
 }

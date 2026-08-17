@@ -34,6 +34,12 @@ export interface ConceptoCreateInput {
   // Due day (1-28, deuda/gasto_fijo only, optional). Unlike the fields above,
   // this stays editable after creation - see ConceptoUpdateInput.
   dia_vencimiento?: number
+  // Which year/month monto_planeado should be seeded into - omit to default
+  // to the server's real current month. Pass the Dashboard's currently
+  // viewed month so creating a concept while browsing e.g. December doesn't
+  // silently land the entry in today's real month instead.
+  anio?: number
+  mes?: number
 }
 
 export interface ConceptoUpdateInput {

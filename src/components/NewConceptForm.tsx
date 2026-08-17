@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Landmark, Receipt, TrendingUp, X } from 'lucide-react'
 import { MoneyInput } from './MoneyInput'
 import { useCreateConcept } from '../hooks/useConcepts'
+import { monthName } from '../lib/format'
 import type { PeriodoTasa, TipoConcepto } from '../types'
 
 const TIPO_OPTIONS: { value: TipoConcepto; label: string; Icon: typeof Landmark }[] = [
@@ -13,7 +14,15 @@ const TIPO_OPTIONS: { value: TipoConcepto; label: string; Icon: typeof Landmark 
 const inputClass =
   'w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
 
-export function NewConceptForm({ onDone }: { onDone: () => void }) {
+export function NewConceptForm({
+  onDone,
+  anio,
+  mes,
+}: {
+  onDone: () => void
+  anio: number
+  mes: number
+}) {
   const [nombre, setNombre] = useState('')
   const [tipo, setTipo] = useState<TipoConcepto>('gasto_fijo')
   const [categoria, setCategoria] = useState('')
@@ -48,6 +57,8 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
           puedeTenerDiaVencimiento && diaVencimiento !== ''
             ? Math.min(28, Math.max(1, Number(diaVencimiento)))
             : undefined,
+        anio,
+        mes,
       },
       { onSuccess: onDone },
     )
@@ -60,7 +71,12 @@ export function NewConceptForm({ onDone }: { onDone: () => void }) {
         className="max-h-[90svh] w-full max-w-sm space-y-3.5 overflow-y-auto rounded-t-3xl border border-line bg-paper-raised p-6 shadow-xl sm:rounded-3xl"
       >
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl font-medium text-ink">Nuevo concepto</h2>
+          <div>
+            <h2 className="font-display text-xl font-medium text-ink">Nuevo concepto</h2>
+            <p className="text-xs text-ink-muted">
+              Se planeará para {monthName(mes)} {anio}
+            </p>
+          </div>
           <button
             type="button"
             onClick={onDone}
