@@ -70,3 +70,16 @@ const TIPO_DOT_CLASSES: Record<string, string> = {
 export function tipoDotClass(tipo: string): string {
   return TIPO_DOT_CLASSES[tipo] ?? 'bg-ink-muted'
 }
+
+// Parses "YYYY-MM-DD" by hand rather than `new Date(fecha)` - the latter
+// parses as UTC midnight, which can display as the previous day in a
+// negative-UTC-offset timezone (like Colombia).
+export function formatFecha(fecha: string): string {
+  const [year, month, day] = fecha.split('-').map(Number)
+  return `${day} ${monthShort(month)} ${year}`
+}
+
+export function formatHora(hora: string): string {
+  const [h, m] = hora.split(':')
+  return `${h}:${m}`
+}

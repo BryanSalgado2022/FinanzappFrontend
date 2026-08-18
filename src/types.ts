@@ -116,6 +116,34 @@ export interface AnnualTrend {
   meses: AnnualMonthTotal[]
 }
 
+export interface Tarea {
+  id: number
+  titulo: string
+  emoji: string | null
+  fecha: string | null
+  hora: string | null
+  nota: string | null
+  completada: boolean
+  vencida: boolean
+}
+
+export interface TareaCreateInput {
+  titulo: string
+  emoji?: string
+  fecha?: string
+  hora?: string
+  nota?: string
+}
+
+export interface TareaUpdateInput {
+  titulo?: string
+  emoji?: string
+  fecha?: string
+  hora?: string
+  nota?: string
+  completada?: boolean
+}
+
 // The backend has no "get current user" endpoint and its JWT payload only
 // carries the user id (see FinanzappBackend design.md). Display info (name,
 // email, picture) comes from decoding the Google credential JWT client-side

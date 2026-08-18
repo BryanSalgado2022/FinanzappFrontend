@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
-import { LayoutDashboard, Leaf, LogOut, Moon, Sun, Tag, Wallet } from 'lucide-react'
+import { CheckSquare, LayoutDashboard, Leaf, LogOut, Moon, Sun, Tag, Wallet } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../hooks/useTheme'
 
@@ -34,6 +34,10 @@ export function Header() {
           <NavLink to="/categorias" className={navLinkClass} aria-label="Categorías">
             <Tag className="h-4 w-4" strokeWidth={2} />
             <span className="hidden sm:inline">Categorías</span>
+          </NavLink>
+          <NavLink to="/tareas" className={navLinkClass} aria-label="Tareas">
+            <CheckSquare className="h-4 w-4" strokeWidth={2} />
+            <span className="hidden sm:inline">Tareas</span>
           </NavLink>
         </nav>
       </div>
