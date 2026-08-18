@@ -202,6 +202,17 @@ export interface GastoUpdateInput {
   categoria_ids?: number[]
 }
 
+export interface UserRead {
+  id: number
+  email: string
+  name: string
+  color_acento: string | null
+}
+
+export interface UserUpdateInput {
+  color_acento: string | null
+}
+
 // The backend has no "get current user" endpoint and its JWT payload only
 // carries the user id (see FinanzappBackend design.md). Display info (name,
 // email, picture) comes from decoding the Google credential JWT client-side

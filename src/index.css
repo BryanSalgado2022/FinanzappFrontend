@@ -36,8 +36,15 @@
   --ink: #241f18;
   --ink-muted: #7c7160;
   --line: #e6ddc7;
-  --accent: #3f6b4a;
-  --accent-soft: #e6efe2;
+  /* --accent-override-light/-dark are set by useAccentColor (both at once,
+     regardless of the current theme) - :root/.dark each pick their own half
+     via the fallback default, so switching themes never needs to know or
+     resync with the chosen accent color, and vice versa. */
+  --accent: var(--accent-override-light, #3f6b4a);
+  /* Derived from --accent, not a static value - so a user's chosen accent
+     color (any of the curated presets) gets a "soft" variant for free,
+     without hand-tuning it separately for each one. */
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--paper));
   --warn: #b4772b;
   --warn-soft: #f6ead6;
   --danger: #a8402f;
@@ -65,8 +72,8 @@
   --ink: #f2ede0;
   --ink-muted: #a89e8a;
   --line: rgba(255, 255, 255, 0.09);
-  --accent: #85c091;
-  --accent-soft: rgba(133, 192, 145, 0.14);
+  --accent: var(--accent-override-dark, #85c091);
+  --accent-soft: color-mix(in srgb, var(--accent) 16%, transparent);
   --warn: #e3a559;
   --warn-soft: rgba(227, 165, 89, 0.14);
   --danger: #e08774;

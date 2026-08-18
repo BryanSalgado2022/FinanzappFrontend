@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { RequireAuth, RedirectIfAuthenticated } from './components/RequireAuth'
 import { Login } from './pages/Login'
@@ -9,8 +10,22 @@ import { Tareas } from './pages/Tareas'
 import { Deudores } from './pages/Deudores'
 import { DeudorDetail } from './pages/DeudorDetail'
 import { Gastos } from './pages/Gastos'
+import { useCurrentUser } from './hooks/useAccentColor'
+import { getAccentColorPreset } from './lib/accentColors'
 
 export function App() {
+  const currentUser = useCurrentUser()
+
+  // Sets both light/dark hex values whenever the saved preference changes -
+  // :root/.dark each pick their own half via CSS, so this never needs to
+  // know or track which theme is currently active (see index.css).
+  useEffect(() => {
+    if (!currentUser.data) return
+    const preset = getAccentColorPreset(currentUser.data.color_acento)
+    document.documentElement.style.setProperty('--accent-override-light', preset.light)
+    document.documentElement.style.setProperty('--accent-override-dark', preset.dark)
+  }, [currentUser.data])
+
   return (
     <Routes>
       <Route element={<RedirectIfAuthenticated />}>
