@@ -144,6 +144,42 @@ export interface TareaUpdateInput {
   completada?: boolean
 }
 
+export interface Deudor {
+  id: number
+  nombre: string
+  monto_total: string
+  fecha: string
+  garantia: string | null
+  activo: boolean
+  saldo_restante: string
+}
+
+export interface DeudorCreateInput {
+  nombre: string
+  monto_total: string
+  fecha: string
+  garantia?: string
+}
+
+export interface DeudorUpdateInput {
+  nombre?: string
+  monto_total?: string
+  fecha?: string
+  garantia?: string
+  activo?: boolean
+}
+
+export interface Abono {
+  id: number
+  monto: string
+  fecha: string
+}
+
+export interface AbonoCreateInput {
+  monto: string
+  fecha: string
+}
+
 // The backend has no "get current user" endpoint and its JWT payload only
 // carries the user id (see FinanzappBackend design.md). Display info (name,
 // email, picture) comes from decoding the Google credential JWT client-side
