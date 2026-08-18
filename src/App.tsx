@@ -4,6 +4,7 @@ import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
 import { ConceptDetail } from './pages/ConceptDetail'
 import { Deudas } from './pages/Deudas'
+import { Categorias } from './pages/Categorias'
 
 export function App() {
   return (
@@ -15,6 +16,7 @@ export function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/concepts/:id" element={<ConceptDetail />} />
         <Route path="/deudas" element={<Deudas />} />
+        <Route path="/categorias" element={<Categorias />} />
       </Route>
     </Routes>
   )

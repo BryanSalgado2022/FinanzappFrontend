@@ -6,7 +6,7 @@ Lets the user see and manage everything about one financial concept in one place
 ## Requirements
 
 ### Requirement: Concept detail header
-The system SHALL display, for a selected concept, its name, type (debt, fixed expense, or income), and category when set.
+The system SHALL display, for a selected concept, its name, type (debt, fixed expense, or income), and the emoji of each assigned category when set.
 
 #### Scenario: Debt concept shows remaining balance
 - **WHEN** the selected concept is a debt with a total amount set
@@ -15,6 +15,14 @@ The system SHALL display, for a selected concept, its name, type (debt, fixed ex
 #### Scenario: Non-debt concept has no balance display
 - **WHEN** the selected concept is a fixed expense or income (no total amount)
 - **THEN** the header does not display a remaining-balance figure
+
+#### Scenario: Concept with multiple categories shows every emoji
+- **WHEN** the selected concept has two or more categories assigned, each with an emoji set
+- **THEN** the header shows every one of those emojis, not just one
+
+#### Scenario: Category without an emoji is shown without one
+- **WHEN** the selected concept has a category assigned that has no emoji set
+- **THEN** the header shows that category without a placeholder emoji
 
 ### Requirement: Twelve-month entry list
 The system SHALL display the concept's monthly entries for a selectable year as a list (not a spreadsheet-style grid) grouped into quarters, each entry showing its month, planned amount, and paid/pending status, with the current calendar month visually distinguished from past and future months. When the selected year is the current calendar year, any quarter falling entirely in the past SHALL be collapsed behind its own control by default, independently of other quarters; the quarter containing the current month SHALL always be shown in full (including any past months within it), and any fully future quarter SHALL always be shown in full. When the selected year is not the current calendar year, all twelve months SHALL be shown in full regardless of the collapse default.
@@ -51,7 +59,7 @@ The system SHALL let the user edit a specific month's planned amount, and separa
 - **THEN** the change is submitted and reflected without navigating away from the Concept Detail screen
 
 ### Requirement: Edit and delete a concept
-The system SHALL let the user edit a concept's name and category, mark it as finished, or delete it, from the Concept Detail screen.
+The system SHALL let the user edit a concept's name and category assignments, mark it as finished, or delete it, from the Concept Detail screen.
 
 #### Scenario: Marking a concept finished
 - **WHEN** the user marks a concept as finished
@@ -60,6 +68,10 @@ The system SHALL let the user edit a concept's name and category, mark it as fin
 #### Scenario: Deleting a concept
 - **WHEN** the user deletes a concept
 - **THEN** the app navigates back to the Dashboard and the concept no longer appears there
+
+#### Scenario: Editing a concept's categories
+- **WHEN** the user edits a concept and changes its selected categories
+- **THEN** the concept's category assignments are updated to exactly the newly selected set
 
 ### Requirement: Amortization terms display
 The system SHALL display, in the Concept Detail header for a debt concept that has amortization terms, its fixed installment amount, interest rate, and number of installments, alongside the existing remaining-balance display. When the concept has a starting installment other than the first, the system SHALL also display that starting installment.
@@ -85,7 +97,7 @@ The system SHALL NOT offer a way to edit `valor_total`, interest rate, installme
 
 #### Scenario: No edit control for amortization terms
 - **WHEN** the user views or edits a debt concept that has amortization terms
-- **THEN** the edit form only allows changing its name and category, not its financial terms or starting installment
+- **THEN** the edit form only allows changing its name and category assignments, not its financial terms or starting installment
 
 ### Requirement: Due day is editable at any time
 The system SHALL let the user set or change a `deuda` or `gasto_fijo` concept's due day from the Concept Detail screen at any time, including on a debt whose amortization terms are locked — unlike those financial terms, the due day is always editable.

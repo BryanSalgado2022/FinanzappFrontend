@@ -1,11 +1,17 @@
 export type TipoConcepto = 'deuda' | 'gasto_fijo' | 'ingreso'
 export type PeriodoTasa = 'mensual' | 'anual'
 
+export interface Categoria {
+  id: number
+  nombre: string
+  emoji: string | null
+}
+
 export interface Concepto {
   id: number
   nombre: string
   tipo: TipoConcepto
-  categoria: string | null
+  categorias: Categoria[]
   valor_total: string | null
   saldo_restante: string | null
   tasa_interes: string | null
@@ -22,7 +28,9 @@ export interface Concepto {
 export interface ConceptoCreateInput {
   nombre: string
   tipo: TipoConcepto
-  categoria?: string
+  // Category ids to assign at creation - all must exist and belong to the
+  // caller. Omitted or empty means no categories.
+  categoria_ids?: number[]
   valor_total?: string
   monto_planeado?: string
   // Amortization terms (deuda only, optional): tasa_interes and numero_cuotas
@@ -49,7 +57,9 @@ export interface ConceptoCreateInput {
 
 export interface ConceptoUpdateInput {
   nombre?: string
-  categoria?: string
+  // Omitted = don't touch category assignments; [] explicitly clears them
+  // all - these are different requests (see FinanzappBackend design.md).
+  categoria_ids?: number[]
   activo?: boolean
   valor_total?: string
   dia_vencimiento?: number

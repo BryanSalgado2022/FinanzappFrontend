@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Landmark, Receipt, TrendingUp, X } from 'lucide-react'
+import { CategoryPicker } from './CategoryPicker'
 import { MoneyInput } from './MoneyInput'
 import { useCreateConcept } from '../hooks/useConcepts'
 import { monthName } from '../lib/format'
@@ -34,7 +35,7 @@ export function NewConceptForm({
 }) {
   const [nombre, setNombre] = useState('')
   const [tipo, setTipo] = useState<TipoConcepto>('gasto_fijo')
-  const [categoria, setCategoria] = useState('')
+  const [categoriaIds, setCategoriaIds] = useState<number[]>([])
   const [valorTotal, setValorTotal] = useState('')
   const [montoPlaneado, setMontoPlaneado] = useState('')
   const [tasaInteres, setTasaInteres] = useState('')
@@ -55,7 +56,7 @@ export function NewConceptForm({
       {
         nombre,
         tipo,
-        categoria: categoria || undefined,
+        categoria_ids: categoriaIds.length > 0 ? categoriaIds : undefined,
         valor_total: tipo === 'deuda' && valorTotal ? valorTotal : undefined,
         monto_planeado: tieneAmortizacion ? undefined : montoPlaneado || undefined,
         tasa_interes: tieneAmortizacion ? tasaInteres : undefined,
@@ -122,12 +123,7 @@ export function NewConceptForm({
           ))}
         </div>
 
-        <input
-          placeholder="Categoría (opcional)"
-          value={categoria}
-          onChange={(e) => setCategoria(e.target.value)}
-          className={inputClass}
-        />
+        <CategoryPicker selectedIds={categoriaIds} onChange={setCategoriaIds} />
 
         {tipo === 'deuda' && (
           <>

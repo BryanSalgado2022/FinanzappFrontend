@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronDown, ChevronLeft, ChevronRight, Pencil, CheckCircle2, Trash2 } from 'lucide-react'
+import { CategoryPicker } from '../components/CategoryPicker'
 import { Header } from '../components/Header'
 import { MonthEntryLegend, MonthEntryRow } from '../components/MonthEntryRow'
 import { ProgressRing } from '../components/ProgressRing'
@@ -27,7 +28,7 @@ export function ConceptDetail() {
   const [anio, setAnio] = useState(now.getFullYear())
   const [editingHeader, setEditingHeader] = useState(false)
   const [nombreDraft, setNombreDraft] = useState('')
-  const [categoriaDraft, setCategoriaDraft] = useState('')
+  const [categoriaIdsDraft, setCategoriaIdsDraft] = useState<number[]>([])
   const [diaVencimientoDraft, setDiaVencimientoDraft] = useState('')
   // Accordion: only one month row can be in edit mode across the whole year.
   const [editingMes, setEditingMes] = useState<number | null>(null)
@@ -92,7 +93,7 @@ export function ConceptDetail() {
 
   const startEditingHeader = () => {
     setNombreDraft(c.nombre)
-    setCategoriaDraft(c.categoria ?? '')
+    setCategoriaIdsDraft(c.categorias.map((cat) => cat.id))
     setDiaVencimientoDraft(c.dia_vencimiento !== null ? String(c.dia_vencimiento) : '')
     setEditingHeader(true)
   }
@@ -114,9 +115,16 @@ export function ConceptDetail() {
                     <span className={`h-2 w-2 shrink-0 rounded-full ${tipoDotClass(c.tipo)}`} />
                     <p className="text-xs font-medium tracking-wide text-ink-muted uppercase">
                       {tipoLabel(c.tipo)}
-                      {c.categoria ? ` · ${c.categoria}` : ''}
                       {!c.activo ? ' · Terminado' : ''}
                     </p>
+                    {c.categorias.some((cat) => cat.emoji) && (
+                      <span className="text-sm" aria-hidden>
+                        {c.categorias
+                          .filter((cat) => cat.emoji)
+                          .map((cat) => cat.emoji)
+                          .join(' ')}
+                      </span>
+                    )}
                   </div>
                   <h1 className="mt-1 truncate font-display text-2xl font-medium text-ink">{c.nombre}</h1>
                 </div>
@@ -225,12 +233,7 @@ export function ConceptDetail() {
                 onChange={(e) => setNombreDraft(e.target.value)}
                 className={inputClass}
               />
-              <input
-                placeholder="Categoría"
-                value={categoriaDraft}
-                onChange={(e) => setCategoriaDraft(e.target.value)}
-                className={inputClass}
-              />
+              <CategoryPicker selectedIds={categoriaIdsDraft} onChange={setCategoriaIdsDraft} />
               {puedeTenerDiaVencimiento && (
                 <input
                   placeholder="Día de vencimiento (opcional, 1-28)"
@@ -254,7 +257,7 @@ export function ConceptDetail() {
                     updateConcept.mutate(
                       {
                         nombre: nombreDraft,
-                        categoria: categoriaDraft || undefined,
+                        categoria_ids: categoriaIdsDraft,
                         dia_vencimiento:
                           puedeTenerDiaVencimiento && diaVencimientoDraft !== ''
                             ? Math.min(28, Math.max(1, Number(diaVencimientoDraft)))
