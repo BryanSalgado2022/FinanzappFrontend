@@ -1,14 +1,25 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Landmark, Plus, Receipt, TrendingUp, Wallet } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Landmark,
+  Plus,
+  Receipt,
+  ShoppingBag,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react'
 import { Header } from '../components/Header'
 import { NewConceptForm } from '../components/NewConceptForm'
+import { NewExpenseForm } from '../components/NewExpenseForm'
 import { AnnualTrendChart } from '../components/AnnualTrendChart'
 import { ConceptTypeTable } from '../components/ConceptTypeTable'
 import { useSummary } from '../hooks/useSummary'
 import { useAnnualTrend } from '../hooks/useAnnualTrend'
 import { useDashboardConcepts } from '../hooks/useDashboardConcepts'
-import { formatCOP, monthName } from '../lib/format'
+import { useGastos } from '../hooks/useGastos'
+import { formatCOP, formatFecha, monthName } from '../lib/format'
 
 const now = new Date()
 
@@ -16,10 +27,12 @@ export function Dashboard() {
   const [anio, setAnio] = useState(now.getFullYear())
   const [mes, setMes] = useState(now.getMonth() + 1)
   const [showNewConcept, setShowNewConcept] = useState(false)
+  const [showNewExpense, setShowNewExpense] = useState(false)
 
   const summary = useSummary(anio, mes)
   const annualTrend = useAnnualTrend(anio)
   const { rows, isLoading: rowsLoading } = useDashboardConcepts(anio, mes)
+  const gastos = useGastos(anio, mes)
 
   const goToPreviousMonth = () => {
     if (mes === 1) {
@@ -125,6 +138,52 @@ export function Dashboard() {
 
         <div>
           <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-lg font-medium text-ink">Gastos variables del mes</h2>
+            <button
+              type="button"
+              onClick={() => setShowNewExpense(true)}
+              className="flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-sm font-medium text-ink transition hover:bg-accent-soft"
+            >
+              <ShoppingBag className="h-3.5 w-3.5" strokeWidth={2.5} />
+              Registrar gasto
+            </button>
+          </div>
+
+          {gastos.isLoading && <p className="text-sm text-ink-muted">Cargando…</p>}
+
+          {!gastos.isLoading && (gastos.data ?? []).length === 0 && (
+            <div className="rounded-2xl border border-dashed border-line px-4 py-6 text-center">
+              <p className="text-sm text-ink-muted">Sin gastos variables este mes.</p>
+            </div>
+          )}
+
+          {!gastos.isLoading && (gastos.data ?? []).length > 0 && (
+            <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-paper-raised">
+              {(gastos.data ?? []).map((gasto) => (
+                <li key={gasto.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1.5 truncate text-ink">
+                      {gasto.categorias.some((c) => c.emoji) && (
+                        <span aria-hidden>
+                          {gasto.categorias
+                            .filter((c) => c.emoji)
+                            .map((c) => c.emoji)
+                            .join(' ')}
+                        </span>
+                      )}
+                      {gasto.descripcion}
+                    </span>
+                    <span className="block text-xs text-ink-muted">{formatFecha(gasto.fecha)}</span>
+                  </span>
+                  <span className="font-tabular shrink-0 text-ink-muted">{formatCOP(gasto.monto)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div>
+          <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-lg font-medium text-ink">Conceptos</h2>
             <button
               type="button"
@@ -173,6 +232,7 @@ export function Dashboard() {
       {showNewConcept && (
         <NewConceptForm anio={anio} mes={mes} onDone={() => setShowNewConcept(false)} />
       )}
+      {showNewExpense && <NewExpenseForm onDone={() => setShowNewExpense(false)} />}
     </div>
   )
 }

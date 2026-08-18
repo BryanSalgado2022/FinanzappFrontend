@@ -180,6 +180,28 @@ export interface AbonoCreateInput {
   fecha: string
 }
 
+export interface Gasto {
+  id: number
+  monto: string
+  fecha: string
+  descripcion: string
+  categorias: Categoria[]
+}
+
+export interface GastoCreateInput {
+  monto: string
+  fecha: string
+  descripcion: string
+  categoria_ids?: number[]
+}
+
+export interface GastoUpdateInput {
+  monto?: string
+  fecha?: string
+  descripcion?: string
+  categoria_ids?: number[]
+}
+
 // The backend has no "get current user" endpoint and its JWT payload only
 // carries the user id (see FinanzappBackend design.md). Display info (name,
 // email, picture) comes from decoding the Google credential JWT client-side

@@ -6,6 +6,7 @@ import {
   Leaf,
   LogOut,
   Moon,
+  Receipt,
   Sun,
   Tag,
   Wallet,
@@ -52,6 +53,10 @@ export function Header() {
           <NavLink to="/deudores" className={navLinkClass} aria-label="Deudores">
             <HandCoins className="h-4 w-4" strokeWidth={2} />
             <span className="hidden sm:inline">Deudores</span>
+          </NavLink>
+          <NavLink to="/gastos" className={navLinkClass} aria-label="Gastos">
+            <Receipt className="h-4 w-4" strokeWidth={2} />
+            <span className="hidden sm:inline">Gastos</span>
           </NavLink>
         </nav>
       </div>
