@@ -14,6 +14,15 @@ const TIPO_OPTIONS: { value: TipoConcepto; label: string; Icon: typeof Landmark 
 const inputClass =
   'w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
 
+// Keeps only digits and a single decimal point - blocks letters, signs, and
+// extra dots so the field can never hold anything but a plain percentage.
+function sanitizeTasaInteres(raw: string): string {
+  const cleaned = raw.replace(/[^0-9.]/g, '')
+  const firstDot = cleaned.indexOf('.')
+  if (firstDot === -1) return cleaned
+  return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '')
+}
+
 export function NewConceptForm({
   onDone,
   anio,
@@ -135,22 +144,31 @@ export function NewConceptForm({
                 cuota fija automáticamente (no editable después).
               </p>
               <div className="flex gap-2">
-                <input
-                  placeholder="Tasa de interés (%)"
-                  inputMode="decimal"
-                  value={tasaInteres}
-                  onChange={(e) => setTasaInteres(e.target.value)}
-                  className={inputClass}
-                />
+                <div className="relative min-w-0 flex-1">
+                  <input
+                    placeholder="Tasa de interés, ej: 27.7"
+                    inputMode="decimal"
+                    value={tasaInteres}
+                    onChange={(e) => setTasaInteres(sanitizeTasaInteres(e.target.value))}
+                    className={`${inputClass} pr-7`}
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm text-ink-muted">
+                    %
+                  </span>
+                </div>
                 <select
                   value={periodoTasa}
                   onChange={(e) => setPeriodoTasa(e.target.value as PeriodoTasa)}
-                  className={`${inputClass} w-auto`}
+                  className={`${inputClass} !w-auto shrink-0`}
                 >
                   <option value="mensual">mensual</option>
                   <option value="anual">anual (E.A.)</option>
                 </select>
               </div>
+              <p className="mt-1 px-1 text-xs text-ink-muted">
+                Escribe el número del porcentaje tal cual (ej: 27.7 para 27.7%), no la fracción
+                (0.277).
+              </p>
               <input
                 placeholder="Número de cuotas"
                 inputMode="numeric"

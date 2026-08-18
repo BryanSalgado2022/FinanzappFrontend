@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { AlertTriangle, Check, Circle } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { AlertTriangle, Check, Circle, Trash2 } from 'lucide-react'
 import { MoneyInput } from './MoneyInput'
 import { formatCOP, monthName } from '../lib/format'
 import type { EntradaMensual, TipoConcepto } from '../types'
@@ -14,6 +14,10 @@ interface MonthEntryRowProps {
   onStopEdit: () => void
   onSave: (input: { monto_planeado: string; monto_pagado?: string; pagado?: boolean }) => void
   saving: boolean
+  puedeEliminarse: boolean
+  deleting: boolean
+  onDelete: () => void
+  deleteError?: string
 }
 
 // "Pagado"/"monto pagado" only makes sense for money going out (deuda,
@@ -87,6 +91,54 @@ function Node({ entry, isCurrentMonth }: { entry: EntradaMensual | undefined; is
   )
 }
 
+const LEGEND_ITEMS: { key: string; label: string; node: ReactNode }[] = [
+  {
+    key: 'pagado',
+    label: 'Pagado',
+    node: (
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-paper-raised">
+        <Check className="h-3 w-3" strokeWidth={3} />
+      </span>
+    ),
+  },
+  {
+    key: 'vencido',
+    label: 'Vencido',
+    node: (
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-danger bg-danger-soft text-danger">
+        <AlertTriangle className="h-2.5 w-2.5" strokeWidth={2.5} />
+      </span>
+    ),
+  },
+  {
+    key: 'pendiente',
+    label: 'Pendiente',
+    node: <span className="h-5 w-5 shrink-0 rounded-full border-2 border-warn bg-paper-raised" />,
+  },
+  {
+    key: 'sin-entrada',
+    label: 'Sin entrada',
+    node: <span className="h-2.5 w-2.5 shrink-0 rounded-full border border-line bg-paper" />,
+  },
+]
+
+/** Fixed, always-visible legend explaining the four Node states - built from
+ * the exact same classes/icons Node renders so it can never visually drift
+ * from what the entry list actually shows. No tooltip/hover: the app is
+ * mobile-first and touch has no hover state. */
+export function MonthEntryLegend() {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-line bg-paper-raised px-4 py-3">
+      {LEGEND_ITEMS.map((item) => (
+        <div key={item.key} className="flex items-center gap-2">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center">{item.node}</span>
+          <span className="text-xs text-ink-muted">{item.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 /** A pill toggle (not a native checkbox) so marking something paid/received
  * feels like a deliberate, satisfying action rather than a form checkbox. */
 function PagadoToggle({
@@ -130,6 +182,10 @@ export function MonthEntryRow({
   onStopEdit,
   onSave,
   saving,
+  puedeEliminarse,
+  deleting,
+  onDelete,
+  deleteError,
 }: MonthEntryRowProps) {
   const labels = LABELS[tipo]
   const [montoPlaneado, setMontoPlaneado] = useState(entry?.monto_planeado ?? '')
@@ -195,22 +251,39 @@ export function MonthEntryRow({
               labelOn={labels.estado}
               labelOff={labels.pendiente}
             />
-            <div className="flex justify-end gap-2 pt-1">
-              <button
-                type="button"
-                onClick={onStopEdit}
-                className="rounded-full px-3 py-1.5 text-sm text-ink-muted hover:text-ink"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving || !montoPlaneado}
-                className="rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-paper disabled:opacity-50"
-              >
-                {saving ? 'Guardando…' : 'Guardar'}
-              </button>
+            {deleteError && <p className="text-xs text-danger">{deleteError}</p>}
+
+            <div className="flex items-center justify-between gap-2 pt-1">
+              {puedeEliminarse && entry ? (
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  disabled={deleting}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-danger hover:opacity-80 disabled:opacity-50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+                  {deleting ? 'Eliminando…' : 'Eliminar'}
+                </button>
+              ) : (
+                <span />
+              )}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={onStopEdit}
+                  className="rounded-full px-3 py-1.5 text-sm text-ink-muted hover:text-ink"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving || !montoPlaneado}
+                  className="rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-paper disabled:opacity-50"
+                >
+                  {saving ? 'Guardando…' : 'Guardar'}
+                </button>
+              </div>
             </div>
           </div>
         )}

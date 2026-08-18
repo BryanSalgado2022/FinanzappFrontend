@@ -23,3 +23,16 @@ export function useUpsertEntry(conceptoId: number) {
     },
   })
 }
+
+export function useDeleteEntry(conceptoId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ anio, mes }: { anio: number; mes: number }) =>
+      apiClient.delete<void>(`/concepts/${conceptoId}/entries/${anio}/${mes}`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: entriesKey(conceptoId) })
+      void queryClient.invalidateQueries({ queryKey: ['summary'] })
+      void queryClient.invalidateQueries({ queryKey: ['concepts', conceptoId] })
+    },
+  })
+}

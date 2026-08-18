@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronDown, ChevronLeft, ChevronRight, Pencil, CheckCircle2, Trash2 } from 'lucide-react'
 import { Header } from '../components/Header'
-import { MonthEntryRow } from '../components/MonthEntryRow'
+import { MonthEntryLegend, MonthEntryRow } from '../components/MonthEntryRow'
 import { ProgressRing } from '../components/ProgressRing'
 import { useConcept, useDeleteConcept, useUpdateConcept } from '../hooks/useConcepts'
-import { useConceptEntries, useUpsertEntry } from '../hooks/useEntries'
+import { useConceptEntries, useDeleteEntry, useUpsertEntry } from '../hooks/useEntries'
 import { formatCOP, quarterLabel, tipoDotClass, tipoLabel } from '../lib/format'
 
 const now = new Date()
@@ -39,6 +39,7 @@ export function ConceptDetail() {
   const concept = useConcept(conceptoId)
   const entries = useConceptEntries(conceptoId)
   const upsertEntry = useUpsertEntry(conceptoId)
+  const deleteEntry = useDeleteEntry(conceptoId)
   const updateConcept = useUpdateConcept(conceptoId)
   const deleteConcept = useDeleteConcept(conceptoId)
 
@@ -59,6 +60,9 @@ export function ConceptDetail() {
     ? Math.round(((Number(c.valor_total) - Number(c.saldo_restante)) / Number(c.valor_total)) * 100)
     : 0
   const puedeTenerDiaVencimiento = c.tipo === 'deuda' || c.tipo === 'gasto_fijo'
+  // Mirrors the backend's fixed-schedule condition (entry_service.py) - only
+  // concepts without a generated schedule allow deleting an individual entry.
+  const puedeEliminarse = c.duracion_meses === null && !(c.tasa_interes !== null && c.numero_cuotas !== null)
 
   const esAnioActual = anio === now.getFullYear()
   const mesActual = now.getMonth() + 1
@@ -291,6 +295,8 @@ export function ConceptDetail() {
           </button>
         </div>
 
+        <MonthEntryLegend />
+
         <div className="space-y-6">
           {QUARTERS.map(({ quarter, months }) => {
             const esTrimestrePasado = esAnioActual && months.every((mes) => mes < mesActual)
@@ -327,10 +333,17 @@ export function ConceptDetail() {
                       entry={entriesByMonth.get(mes)}
                       tipo={c.tipo}
                       isEditing={editingMes === mes}
-                      onStartEdit={() => setEditingMes(mes)}
+                      onStartEdit={() => {
+                        deleteEntry.reset()
+                        setEditingMes(mes)
+                      }}
                       onStopEdit={() => setEditingMes(null)}
                       saving={upsertEntry.isPending}
                       onSave={(input) => upsertEntry.mutate({ anio, mes, input })}
+                      puedeEliminarse={puedeEliminarse}
+                      deleting={deleteEntry.isPending}
+                      onDelete={() => deleteEntry.mutate({ anio, mes }, { onSuccess: () => setEditingMes(null) })}
+                      deleteError={deleteEntry.isError ? deleteEntry.error.message : undefined}
                     />
                   ))}
                 </ul>
