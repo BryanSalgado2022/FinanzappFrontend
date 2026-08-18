@@ -1,31 +1,26 @@
-import { Link, NavLink } from 'react-router-dom'
-import {
-  CheckSquare,
-  HandCoins,
-  LayoutDashboard,
-  Leaf,
-  LogOut,
-  Moon,
-  Receipt,
-  Sun,
-  Tag,
-  Wallet,
-} from 'lucide-react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Leaf, LogOut, Menu, Moon, Sun } from 'lucide-react'
+import { Sidebar } from './Sidebar'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../hooks/useTheme'
-
-const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition ${
-    isActive ? 'bg-accent-soft text-accent' : 'text-ink-muted hover:text-ink'
-  }`
 
 export function Header() {
   const { user, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <header className="flex items-center justify-between gap-3 border-b border-line px-5 py-4">
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Abrir menú"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition hover:bg-accent-soft hover:text-ink"
+        >
+          <Menu className="h-4 w-4" strokeWidth={2} />
+        </button>
         <Link
           to="/"
           className="flex items-center gap-2 font-display text-xl font-semibold tracking-tight text-ink"
@@ -33,32 +28,6 @@ export function Header() {
           <Leaf className="h-5 w-5 text-accent" strokeWidth={2} />
           <span className="hidden sm:inline">Finanzapp</span>
         </Link>
-        <nav className="flex items-center gap-1">
-          <NavLink to="/" end className={navLinkClass} aria-label="Dashboard">
-            <LayoutDashboard className="h-4 w-4" strokeWidth={2} />
-            <span className="hidden sm:inline">Dashboard</span>
-          </NavLink>
-          <NavLink to="/deudas" className={navLinkClass} aria-label="Deudas">
-            <Wallet className="h-4 w-4" strokeWidth={2} />
-            <span className="hidden sm:inline">Deudas</span>
-          </NavLink>
-          <NavLink to="/categorias" className={navLinkClass} aria-label="Categorías">
-            <Tag className="h-4 w-4" strokeWidth={2} />
-            <span className="hidden sm:inline">Categorías</span>
-          </NavLink>
-          <NavLink to="/tareas" className={navLinkClass} aria-label="Tareas">
-            <CheckSquare className="h-4 w-4" strokeWidth={2} />
-            <span className="hidden sm:inline">Tareas</span>
-          </NavLink>
-          <NavLink to="/deudores" className={navLinkClass} aria-label="Deudores">
-            <HandCoins className="h-4 w-4" strokeWidth={2} />
-            <span className="hidden sm:inline">Deudores</span>
-          </NavLink>
-          <NavLink to="/gastos" className={navLinkClass} aria-label="Gastos">
-            <Receipt className="h-4 w-4" strokeWidth={2} />
-            <span className="hidden sm:inline">Gastos</span>
-          </NavLink>
-        </nav>
       </div>
 
       <div className="flex items-center gap-3">
@@ -85,6 +54,8 @@ export function Header() {
           <span className="hidden sm:inline">Cerrar sesión</span>
         </button>
       </div>
+
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
     </header>
   )
 }
