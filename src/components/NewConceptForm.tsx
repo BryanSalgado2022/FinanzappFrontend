@@ -3,11 +3,11 @@ import { Landmark, Receipt, TrendingUp, X } from 'lucide-react'
 import { CategoryPicker } from './CategoryPicker'
 import { MoneyInput } from './MoneyInput'
 import { useCreateConcept } from '../hooks/useConcepts'
-import { monthName } from '../lib/format'
+import { diaVencimientoLabel, monthName } from '../lib/format'
 import type { PeriodoTasa, TipoConcepto } from '../types'
 
 const TIPO_OPTIONS: { value: TipoConcepto; label: string; Icon: typeof Landmark }[] = [
-  { value: 'gasto_fijo', label: 'Gasto fijo', Icon: Receipt },
+  { value: 'gasto_fijo', label: 'Pago mensual', Icon: Receipt },
   { value: 'deuda', label: 'Deuda', Icon: Landmark },
   { value: 'ingreso', label: 'Ingreso', Icon: TrendingUp },
 ]
@@ -28,13 +28,17 @@ export function NewConceptForm({
   onDone,
   anio,
   mes,
+  initialTipo = 'gasto_fijo',
+  initialDiaVencimiento,
 }: {
   onDone: () => void
   anio: number
   mes: number
+  initialTipo?: TipoConcepto
+  initialDiaVencimiento?: number
 }) {
   const [nombre, setNombre] = useState('')
-  const [tipo, setTipo] = useState<TipoConcepto>('gasto_fijo')
+  const [tipo, setTipo] = useState<TipoConcepto>(initialTipo)
   const [categoriaIds, setCategoriaIds] = useState<number[]>([])
   const [valorTotal, setValorTotal] = useState('')
   const [montoPlaneado, setMontoPlaneado] = useState('')
@@ -43,12 +47,15 @@ export function NewConceptForm({
   const [numeroCuotas, setNumeroCuotas] = useState('')
   const [cuotaInicial, setCuotaInicial] = useState('')
   const [duracionMeses, setDuracionMeses] = useState('')
-  const [diaVencimiento, setDiaVencimiento] = useState('')
+  const [diaVencimiento, setDiaVencimiento] = useState(
+    initialDiaVencimiento !== undefined ? String(initialDiaVencimiento) : '',
+  )
   const createConcept = useCreateConcept()
 
   const tieneAmortizacion = tipo === 'deuda' && tasaInteres !== '' && numeroCuotas !== ''
   const puedeTenerDuracion = tipo === 'gasto_fijo' || tipo === 'ingreso'
-  const puedeTenerDiaVencimiento = tipo === 'deuda' || tipo === 'gasto_fijo'
+  const puedeTenerDiaVencimiento = tipo === 'deuda' || tipo === 'gasto_fijo' || tipo === 'ingreso'
+  const diaLabel = diaVencimientoLabel(tipo)
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
@@ -222,7 +229,7 @@ export function NewConceptForm({
         {puedeTenerDiaVencimiento && (
           <div>
             <input
-              placeholder="Día de vencimiento (opcional, 1-28)"
+              placeholder={`${diaLabel.field} (opcional, 1-28)`}
               inputMode="numeric"
               value={diaVencimiento}
               onChange={(e) => setDiaVencimiento(e.target.value)}
@@ -230,8 +237,10 @@ export function NewConceptForm({
             />
             <p className="mt-1 px-1 text-xs text-ink-muted">
               {diaVencimiento
-                ? 'Se usará para marcar cuotas vencidas si no las has pagado a tiempo.'
-                : 'Vacío = sin fecha de vencimiento, como hoy.'}
+                ? tipo === 'ingreso'
+                  ? 'Se usará para ubicar este ingreso en la Agenda.'
+                  : 'Se usará para marcar cuotas vencidas si no las has pagado a tiempo.'
+                : `Vacío = sin ${diaLabel.field.toLowerCase()}, como hoy.`}
             </p>
           </div>
         )}

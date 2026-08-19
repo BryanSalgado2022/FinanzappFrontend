@@ -7,9 +7,15 @@ import { useCreateGasto } from '../hooks/useGastos'
 const inputClass =
   'w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
 
-export function NewExpenseForm({ onDone }: { onDone: () => void }) {
+export function NewExpenseForm({
+  onDone,
+  initialFecha,
+}: {
+  onDone: () => void
+  initialFecha?: string
+}) {
   const [monto, setMonto] = useState('')
-  const [fecha, setFecha] = useState('')
+  const [fecha, setFecha] = useState(initialFecha ?? '')
   const [descripcion, setDescripcion] = useState('')
   const [categoriaIds, setCategoriaIds] = useState<number[]>([])
   const createGasto = useCreateGasto()

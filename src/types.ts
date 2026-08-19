@@ -22,6 +22,7 @@ export interface Concepto {
   duracion_meses: number | null
   dia_vencimiento: number | null
   activo: boolean
+  finalizado_en: string | null
   created_at: string
 }
 
@@ -44,7 +45,7 @@ export interface ConceptoCreateInput {
   // Fixed duration (gasto_fijo/ingreso only, optional, immutable): generates
   // exactly this many months at creation instead of the open-ended behavior.
   duracion_meses?: number
-  // Due day (1-28, deuda/gasto_fijo only, optional). Unlike the fields above,
+  // Due day (1-28, any concept type, optional). Unlike the fields above,
   // this stays editable after creation - see ConceptoUpdateInput.
   dia_vencimiento?: number
   // Which year/month monto_planeado should be seeded into - omit to default
@@ -73,6 +74,7 @@ export interface EntradaMensual {
   monto_planeado: string
   monto_pagado: string | null
   pagado: boolean
+  fecha_pago: string | null
   vencida: boolean
 }
 
@@ -151,6 +153,7 @@ export interface Deudor {
   fecha: string
   garantia: string | null
   activo: boolean
+  finalizado_en: string | null
   saldo_restante: string
 }
 

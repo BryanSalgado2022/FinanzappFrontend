@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
-import { CheckSquare, HandCoins, LayoutDashboard, Receipt, Tag, Wallet } from 'lucide-react'
+import { CalendarDays, CheckSquare, HandCoins, LayoutDashboard, Receipt, Tag, Wallet } from 'lucide-react'
 
 const sidebarLinkClass = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition ${
@@ -33,6 +33,10 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         <NavLink to="/" end className={sidebarLinkClass} aria-label="Dashboard" onClick={onClose}>
           <LayoutDashboard className="h-4 w-4" strokeWidth={2} />
           Dashboard
+        </NavLink>
+        <NavLink to="/agenda" className={sidebarLinkClass} aria-label="Agenda" onClick={onClose}>
+          <CalendarDays className="h-4 w-4" strokeWidth={2} />
+          Agenda
         </NavLink>
         <NavLink to="/deudas" className={sidebarLinkClass} aria-label="Deudas" onClick={onClose}>
           <Wallet className="h-4 w-4" strokeWidth={2} />

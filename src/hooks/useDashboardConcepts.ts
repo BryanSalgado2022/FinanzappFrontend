@@ -6,6 +6,10 @@ import type { Concepto, EntradaMensual } from '../types'
 export interface DashboardConceptRow {
   concepto: Concepto
   entry: EntradaMensual | undefined
+  // All of the concept's entries, not just the selected month's - used by
+  // the Agenda to find which paid entry most recently zeroed out a debt's
+  // balance (see lib/agendaEvents.ts). Dashboard.tsx only ever reads `entry`.
+  entries: EntradaMensual[]
 }
 
 /**
@@ -31,7 +35,7 @@ export function useDashboardConcepts(anio: number, mes: number) {
   const rows: DashboardConceptRow[] = concepts.map((concepto, index) => {
     const entries = entryQueries[index]?.data ?? []
     const entry = entries.find((e) => e.anio === anio && e.mes === mes)
-    return { concepto, entry }
+    return { concepto, entry, entries }
   })
 
   return { rows, isLoading }

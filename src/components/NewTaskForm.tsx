@@ -6,10 +6,16 @@ import { useCreateTarea } from '../hooks/useTareas'
 const inputClass =
   'w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
 
-export function NewTaskForm({ onDone }: { onDone: () => void }) {
+export function NewTaskForm({
+  onDone,
+  initialFecha,
+}: {
+  onDone: () => void
+  initialFecha?: string
+}) {
   const [titulo, setTitulo] = useState('')
   const [emoji, setEmoji] = useState<string | null>(null)
-  const [fecha, setFecha] = useState('')
+  const [fecha, setFecha] = useState(initialFecha ?? '')
   const [hora, setHora] = useState('')
   const [nota, setNota] = useState('')
   const createTarea = useCreateTarea()

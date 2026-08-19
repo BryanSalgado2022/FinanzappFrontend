@@ -1,3 +1,5 @@
+import type { TipoConcepto } from '../types'
+
 const cop = new Intl.NumberFormat('es-CO', {
   style: 'currency',
   currency: 'COP',
@@ -51,9 +53,13 @@ export function quarterLabel(quarter: 1 | 2 | 3 | 4): string {
   return `T${quarter} · ${monthShort(startMonth)}–${monthShort(startMonth + 2)}`
 }
 
+// "gasto_fijo" displays as "Pago mensual" - the internal identifier is
+// unchanged (still `gasto_fijo` in the API), this is a label-only rename to
+// avoid colliding with "Gasto puntual" (the separate Gasto entity) in the
+// unified creation menu.
 const TIPO_LABELS: Record<string, string> = {
   deuda: 'Deuda',
-  gasto_fijo: 'Gasto fijo',
+  gasto_fijo: 'Pago mensual',
   ingreso: 'Ingreso',
 }
 
@@ -82,4 +88,17 @@ export function formatFecha(fecha: string): string {
 export function formatHora(hora: string): string {
   const [h, m] = hora.split(':')
   return `${h}:${m}`
+}
+
+// An `ingreso` doesn't "vencer" (become due) - it's received. Centralizes
+// the two label variants so ConceptDetail, NewConceptForm, and the Agenda's
+// event rendering never duplicate this tipo-check on their own.
+export function diaVencimientoLabel(tipo: TipoConcepto): {
+  field: string
+  display: (dia: number) => string
+} {
+  if (tipo === 'ingreso') {
+    return { field: 'Día de pago', display: (dia) => `Te pagan el día ${dia}` }
+  }
+  return { field: 'Día de vencimiento', display: (dia) => `Vence el día ${dia}` }
 }

@@ -1,15 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  ChevronLeft,
-  ChevronRight,
-  Landmark,
-  Plus,
-  Receipt,
-  ShoppingBag,
-  TrendingUp,
-  Wallet,
-} from 'lucide-react'
+import { ChevronLeft, ChevronRight, Landmark, Plus, Receipt, TrendingUp, Wallet } from 'lucide-react'
+import { AddMenu } from '../components/AddMenu'
 import { Header } from '../components/Header'
 import { NewConceptForm } from '../components/NewConceptForm'
 import { NewExpenseForm } from '../components/NewExpenseForm'
@@ -20,6 +12,7 @@ import { useAnnualTrend } from '../hooks/useAnnualTrend'
 import { useDashboardConcepts } from '../hooks/useDashboardConcepts'
 import { useGastos } from '../hooks/useGastos'
 import { formatCOP, formatFecha, monthName } from '../lib/format'
+import type { TipoConcepto } from '../types'
 
 const now = new Date()
 
@@ -27,7 +20,9 @@ export function Dashboard() {
   const [anio, setAnio] = useState(now.getFullYear())
   const [mes, setMes] = useState(now.getMonth() + 1)
   const [showNewConcept, setShowNewConcept] = useState(false)
+  const [newConceptTipo, setNewConceptTipo] = useState<TipoConcepto>('gasto_fijo')
   const [showNewExpense, setShowNewExpense] = useState(false)
+  const [addMenuOpen, setAddMenuOpen] = useState(false)
 
   const summary = useSummary(anio, mes)
   const annualTrend = useAnnualTrend(anio)
@@ -139,14 +134,25 @@ export function Dashboard() {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-lg font-medium text-ink">Gastos variables del mes</h2>
-            <button
-              type="button"
-              onClick={() => setShowNewExpense(true)}
-              className="flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-sm font-medium text-ink transition hover:bg-accent-soft"
-            >
-              <ShoppingBag className="h-3.5 w-3.5" strokeWidth={2.5} />
-              Registrar gasto
-            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setAddMenuOpen((v) => !v)}
+                className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-paper transition hover:opacity-90"
+              >
+                <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+                Agregar
+              </button>
+              <AddMenu
+                open={addMenuOpen}
+                onClose={() => setAddMenuOpen(false)}
+                onSelectGasto={() => setShowNewExpense(true)}
+                onSelectConcepto={(tipo) => {
+                  setNewConceptTipo(tipo)
+                  setShowNewConcept(true)
+                }}
+              />
+            </div>
           </div>
 
           {gastos.isLoading && <p className="text-sm text-ink-muted">Cargando…</p>}
@@ -185,14 +191,6 @@ export function Dashboard() {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-lg font-medium text-ink">Conceptos</h2>
-            <button
-              type="button"
-              onClick={() => setShowNewConcept(true)}
-              className="flex items-center gap-1.5 rounded-full bg-ink px-4 py-1.5 text-sm font-medium text-paper transition hover:opacity-90"
-            >
-              <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-              Nuevo
-            </button>
           </div>
 
           {rowsLoading && <p className="text-sm text-ink-muted">Cargando…</p>}
@@ -200,7 +198,7 @@ export function Dashboard() {
           {!rowsLoading && rows.length === 0 && (
             <div className="rounded-2xl border border-dashed border-line px-4 py-8 text-center">
               <p className="text-sm text-ink-muted">Aún no tienes conceptos.</p>
-              <p className="mt-1 text-sm text-ink-muted">Crea el primero con "Nuevo".</p>
+              <p className="mt-1 text-sm text-ink-muted">Crea el primero con "+ Agregar" arriba.</p>
             </div>
           )}
 
@@ -213,10 +211,10 @@ export function Dashboard() {
                 emptyLabel="Sin deudas este mes."
               />
               <ConceptTypeTable
-                title="Gastos fijos"
+                title="Pagos mensuales"
                 Icon={Receipt}
                 rows={gastosFijos}
-                emptyLabel="Sin gastos fijos este mes."
+                emptyLabel="Sin pagos mensuales este mes."
               />
               <ConceptTypeTable
                 title="Ingresos"
@@ -230,7 +228,12 @@ export function Dashboard() {
       </main>
 
       {showNewConcept && (
-        <NewConceptForm anio={anio} mes={mes} onDone={() => setShowNewConcept(false)} />
+        <NewConceptForm
+          anio={anio}
+          mes={mes}
+          initialTipo={newConceptTipo}
+          onDone={() => setShowNewConcept(false)}
+        />
       )}
       {showNewExpense && <NewExpenseForm onDone={() => setShowNewExpense(false)} />}
     </div>

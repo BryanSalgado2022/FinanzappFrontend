@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import { RequireAuth, RedirectIfAuthenticated } from './components/RequireAuth'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
+import { Agenda } from './pages/Agenda'
 import { ConceptDetail } from './pages/ConceptDetail'
 import { Deudas } from './pages/Deudas'
 import { Categorias } from './pages/Categorias'
@@ -33,6 +34,7 @@ export function App() {
       </Route>
       <Route element={<RequireAuth />}>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/agenda" element={<Agenda />} />
         <Route path="/concepts/:id" element={<ConceptDetail />} />
         <Route path="/deudas" element={<Deudas />} />
         <Route path="/categorias" element={<Categorias />} />

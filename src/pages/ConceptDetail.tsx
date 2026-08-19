@@ -7,7 +7,7 @@ import { MonthEntryLegend, MonthEntryRow } from '../components/MonthEntryRow'
 import { ProgressRing } from '../components/ProgressRing'
 import { useConcept, useDeleteConcept, useUpdateConcept } from '../hooks/useConcepts'
 import { useConceptEntries, useDeleteEntry, useUpsertEntry } from '../hooks/useEntries'
-import { formatCOP, quarterLabel, tipoDotClass, tipoLabel } from '../lib/format'
+import { diaVencimientoLabel, formatCOP, quarterLabel, tipoDotClass, tipoLabel } from '../lib/format'
 
 const now = new Date()
 const QUARTERS: { quarter: 1 | 2 | 3 | 4; months: number[] }[] = [
@@ -60,7 +60,8 @@ export function ConceptDetail() {
   const percentPaid = isDebt
     ? Math.round(((Number(c.valor_total) - Number(c.saldo_restante)) / Number(c.valor_total)) * 100)
     : 0
-  const puedeTenerDiaVencimiento = c.tipo === 'deuda' || c.tipo === 'gasto_fijo'
+  const puedeTenerDiaVencimiento = c.tipo === 'deuda' || c.tipo === 'gasto_fijo' || c.tipo === 'ingreso'
+  const diaLabel = diaVencimientoLabel(c.tipo)
   // Mirrors the backend's fixed-schedule condition (entry_service.py) - only
   // concepts without a generated schedule allow deleting an individual entry.
   const puedeEliminarse = c.duracion_meses === null && !(c.tasa_interes !== null && c.numero_cuotas !== null)
@@ -198,9 +199,9 @@ export function ConceptDetail() {
 
               {c.dia_vencimiento !== null && (
                 <div className="mt-4 rounded-xl bg-paper px-3 py-2.5 text-center">
-                  <p className="text-xs text-ink-muted">Vencimiento</p>
+                  <p className="text-xs text-ink-muted">{diaLabel.field}</p>
                   <p className="font-tabular text-sm font-semibold text-ink">
-                    Vence el día {c.dia_vencimiento}
+                    {diaLabel.display(c.dia_vencimiento)}
                   </p>
                 </div>
               )}
@@ -236,7 +237,7 @@ export function ConceptDetail() {
               <CategoryPicker selectedIds={categoriaIdsDraft} onChange={setCategoriaIdsDraft} />
               {puedeTenerDiaVencimiento && (
                 <input
-                  placeholder="Día de vencimiento (opcional, 1-28)"
+                  placeholder={`${diaLabel.field} (opcional, 1-28)`}
                   inputMode="numeric"
                   value={diaVencimientoDraft}
                   onChange={(e) => setDiaVencimientoDraft(e.target.value)}
