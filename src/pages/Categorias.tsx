@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
 import { ChevronDown, Trash2 } from 'lucide-react'
-import { Header } from '../components/Header'
 import { ALLOWED_CATEGORY_EMOJIS } from '../lib/categoryEmojis'
 import {
   useCategorias,
@@ -147,9 +146,7 @@ export function Categorias() {
   }
 
   return (
-    <div className="min-h-svh bg-paper">
-      <Header />
-
+    <>
       <main className="mx-auto max-w-xl space-y-6 p-5 pb-24">
         <h1 className="font-display text-2xl font-medium text-ink">Categorías</h1>
 
@@ -191,6 +188,6 @@ export function Categorias() {
           </ul>
         )}
       </main>
-    </div>
+    </>
   )
 }

@@ -1,4 +1,4 @@
-import { CheckSquare, HandCoins, Landmark, Receipt, ShoppingBag, TrendingUp } from 'lucide-react'
+import { CheckSquare, HandCoins, Landmark, ShoppingBag } from 'lucide-react'
 import type { AgendaEvent } from '../lib/agendaEvents'
 import { formatCOP, formatFecha } from '../lib/format'
 

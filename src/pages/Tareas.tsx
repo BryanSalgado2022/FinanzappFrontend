@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Check, ChevronDown, Plus, Trash2 } from 'lucide-react'
-import { Header } from '../components/Header'
 import { NewTaskForm } from '../components/NewTaskForm'
 import { ALLOWED_TASK_EMOJIS } from '../lib/taskEmojis'
 import { formatFecha, formatHora } from '../lib/format'
@@ -228,9 +227,7 @@ export function Tareas() {
   const sinFecha = todas.filter((t) => t.fecha === null)
 
   return (
-    <div className="min-h-svh bg-paper">
-      <Header />
-
+    <>
       <main className="mx-auto max-w-xl space-y-6 p-5 pb-24">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl font-medium text-ink">Tareas</h1>
@@ -292,6 +289,6 @@ export function Tareas() {
       </main>
 
       {showForm && <NewTaskForm onDone={() => setShowForm(false)} />}
-    </div>
+    </>
   )
 }

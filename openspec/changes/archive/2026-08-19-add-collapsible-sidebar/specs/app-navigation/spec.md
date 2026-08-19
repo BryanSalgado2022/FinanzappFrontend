@@ -1,9 +1,4 @@
-# app-navigation Specification
-
-## Purpose
-Provides the global navigation shell shared by every authenticated screen: a top bar with the app logo and user actions, and a hidden-by-default sidebar for moving between the app's sections, so the top bar stays uncluttered as more sections are added.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Top bar
 The system SHALL display, on every authenticated screen, a top bar containing the app logo (linking to the Dashboard), a control to open the sidebar shown only on screens narrower than `md:` (768px), and the existing user actions (user's name, theme toggle, sign out).
@@ -65,6 +60,8 @@ Below `md:` (768px), the system SHALL open the sidebar as an overlay above the c
 #### Scenario: Closing via navigation
 - **WHEN** the sidebar is open as an overlay and the user activates any of its navigation links
 - **THEN** the app navigates to that section and the sidebar closes
+
+## ADDED Requirements
 
 ### Requirement: Sidebar is persistent and collapsible from md: up
 From `md:` (768px) up, the system SHALL render the sidebar as a permanent column that pushes the page's content rather than covering it, toggleable by the user between an expanded state (icons and labels) and a collapsed state (icons only), via a control inside the sidebar itself.

@@ -2,14 +2,12 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Leaf, LogOut, Menu, Moon, Palette, Sun } from 'lucide-react'
 import { AccentColorPicker } from './AccentColorPicker'
-import { Sidebar } from './Sidebar'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../hooks/useTheme'
 
-export function Header() {
+export function Header({ onOpenMobileSidebar }: { onOpenMobileSidebar: () => void }) {
   const { user, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [colorPickerOpen, setColorPickerOpen] = useState(false)
 
   return (
@@ -17,9 +15,9 @@ export function Header() {
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={() => setSidebarOpen(true)}
+          onClick={onOpenMobileSidebar}
           aria-label="Abrir menú"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition hover:bg-accent-soft hover:text-ink"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-ink-muted transition hover:bg-accent-soft hover:text-ink md:hidden"
         >
           <Menu className="h-4 w-4" strokeWidth={2} />
         </button>
@@ -67,8 +65,6 @@ export function Header() {
           <span className="hidden sm:inline">Cerrar sesión</span>
         </button>
       </div>
-
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
     </header>
   )
 }

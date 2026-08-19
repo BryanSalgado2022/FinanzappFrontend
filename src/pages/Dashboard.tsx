@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Landmark, Plus, Receipt, TrendingUp, Wallet } from 'lucide-react'
 import { AddMenu } from '../components/AddMenu'
-import { Header } from '../components/Header'
 import { NewConceptForm } from '../components/NewConceptForm'
 import { NewExpenseForm } from '../components/NewExpenseForm'
 import { AnnualTrendChart } from '../components/AnnualTrendChart'
@@ -55,9 +54,7 @@ export function Dashboard() {
   const ingresos = rows.filter((r) => r.concepto.tipo === 'ingreso')
 
   return (
-    <div className="min-h-svh bg-paper">
-      <Header />
-
+    <>
       <main className="mx-auto max-w-xl space-y-8 p-5 pb-24 lg:max-w-6xl">
         <div className="flex items-center justify-center gap-1 pt-1">
           <button
@@ -236,6 +233,6 @@ export function Dashboard() {
         />
       )}
       {showNewExpense && <NewExpenseForm onDone={() => setShowNewExpense(false)} />}
-    </div>
+    </>
   )
 }

@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CheckCircle2, Pencil, Trash2 } from 'lucide-react'
-import { Header } from '../components/Header'
 import { MoneyInput } from '../components/MoneyInput'
 import { ProgressRing } from '../components/ProgressRing'
 import {
@@ -60,12 +59,7 @@ export function DeudorDetail() {
   const createAbono = useCreateAbono(deudorId)
 
   if (deudor.isLoading || !deudor.data) {
-    return (
-      <div className="min-h-svh bg-paper">
-        <Header />
-        <p className="p-5 text-sm text-ink-muted">Cargando…</p>
-      </div>
-    )
+    return <p className="p-5 text-sm text-ink-muted">Cargando…</p>
   }
 
   const d = deudor.data
@@ -94,9 +88,7 @@ export function DeudorDetail() {
   }
 
   return (
-    <div className="min-h-svh bg-paper">
-      <Header />
-
+    <>
       <main className="mx-auto max-w-xl space-y-8 p-5 pb-24">
         <div className="rounded-3xl border border-line bg-paper-raised p-6">
           {!editingHeader ? (
@@ -267,6 +259,6 @@ export function DeudorDetail() {
           )}
         </div>
       </main>
-    </div>
+    </>
   )
 }

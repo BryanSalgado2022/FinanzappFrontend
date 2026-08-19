@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronDown, ChevronLeft, ChevronRight, Pencil, CheckCircle2, Trash2 } from 'lucide-react'
 import { CategoryPicker } from '../components/CategoryPicker'
-import { Header } from '../components/Header'
 import { MonthEntryLegend, MonthEntryRow } from '../components/MonthEntryRow'
 import { ProgressRing } from '../components/ProgressRing'
 import { useConcept, useDeleteConcept, useUpdateConcept } from '../hooks/useConcepts'
@@ -45,12 +44,7 @@ export function ConceptDetail() {
   const deleteConcept = useDeleteConcept(conceptoId)
 
   if (concept.isLoading || !concept.data) {
-    return (
-      <div className="min-h-svh bg-paper">
-        <Header />
-        <p className="p-5 text-sm text-ink-muted">Cargando…</p>
-      </div>
-    )
+    return <p className="p-5 text-sm text-ink-muted">Cargando…</p>
   }
 
   const c = concept.data
@@ -103,9 +97,7 @@ export function ConceptDetail() {
   const handleDelete = () => deleteConcept.mutate(undefined, { onSuccess: () => navigate('/') })
 
   return (
-    <div className="min-h-svh bg-paper">
-      <Header />
-
+    <>
       <main className="mx-auto max-w-xl space-y-8 p-5 pb-24 lg:max-w-3xl">
         <div className="rounded-3xl border border-line bg-paper-raised p-6">
           {!editingHeader ? (
@@ -357,6 +349,6 @@ export function ConceptDetail() {
           })}
         </div>
       </main>
-    </div>
+    </>
   )
 }

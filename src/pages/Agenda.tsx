@@ -5,7 +5,6 @@ import { AddMenu } from '../components/AddMenu'
 import { CalendarGrid, CalendarLegend } from '../components/CalendarGrid'
 import { DayEventList } from '../components/DayEventList'
 import { EventDetailPopover } from '../components/EventDetailPopover'
-import { Header } from '../components/Header'
 import { NewConceptForm } from '../components/NewConceptForm'
 import { NewExpenseForm } from '../components/NewExpenseForm'
 import { NewTaskForm } from '../components/NewTaskForm'
@@ -101,9 +100,7 @@ export function Agenda() {
   const diaSeleccionado = selectedDate ? Number(selectedDate.split('-')[2]) : null
 
   return (
-    <div className="min-h-svh bg-paper">
-      <Header />
-
+    <>
       <main className="mx-auto max-w-xl space-y-6 p-5 pb-24 lg:max-w-3xl">
         <div className="flex items-center justify-center gap-2 pt-1">
           <button
@@ -199,6 +196,6 @@ export function Agenda() {
       {showNewTask && selectedDate && (
         <NewTaskForm initialFecha={selectedDate} onDone={() => setShowNewTask(false)} />
       )}
-    </div>
+    </>
   )
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, Trash2 } from 'lucide-react'
 import { CategoryPicker } from '../components/CategoryPicker'
-import { Header } from '../components/Header'
 import { MoneyInput } from '../components/MoneyInput'
 import { NewExpenseForm } from '../components/NewExpenseForm'
 import { useDeleteGasto, useGastos, useUpdateGasto } from '../hooks/useGastos'
@@ -135,9 +134,7 @@ export function Gastos() {
   const ordenados = [...(gastos.data ?? [])].sort((a, b) => (a.fecha < b.fecha ? 1 : -1))
 
   return (
-    <div className="min-h-svh bg-paper">
-      <Header />
-
+    <>
       <main className="mx-auto max-w-xl space-y-6 p-5 pb-24">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl font-medium text-ink">Gastos</h1>
@@ -174,6 +171,6 @@ export function Gastos() {
       </main>
 
       {showForm && <NewExpenseForm onDone={() => setShowForm(false)} />}
-    </div>
+    </>
   )
 }

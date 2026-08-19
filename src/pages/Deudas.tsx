@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { Header } from '../components/Header'
 import { DebtCompositionChart } from '../components/DebtCompositionChart'
 import { useDebtsSummary } from '../hooks/useDebtsSummary'
 import { formatCOP } from '../lib/format'
@@ -8,9 +7,7 @@ export function Deudas() {
   const { data, isLoading } = useDebtsSummary()
 
   return (
-    <div className="min-h-svh bg-paper">
-      <Header />
-
+    <>
       <main className="mx-auto max-w-xl space-y-8 p-5 pb-24">
         <h1 className="font-display text-2xl font-medium text-ink">Deudas</h1>
 
@@ -80,6 +77,6 @@ export function Deudas() {
           </>
         )}
       </main>
-    </div>
+    </>
   )
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, Shield } from 'lucide-react'
-import { Header } from '../components/Header'
 import { NewDeudorForm } from '../components/NewDeudorForm'
 import { useDeudores } from '../hooks/useDeudores'
 import { formatCOP } from '../lib/format'
@@ -16,9 +15,7 @@ export function Deudores() {
   const conGarantia = activos.filter((d) => d.garantia).length
 
   return (
-    <div className="min-h-svh bg-paper">
-      <Header />
-
+    <>
       <main className="mx-auto max-w-xl space-y-8 p-5 pb-24">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl font-medium text-ink">Deudores</h1>
@@ -87,6 +84,6 @@ export function Deudores() {
       </main>
 
       {showForm && <NewDeudorForm onDone={() => setShowForm(false)} />}
-    </div>
+    </>
   )
 }
