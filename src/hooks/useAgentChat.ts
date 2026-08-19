@@ -2,6 +2,11 @@ import { useState } from 'react'
 import { apiClient, ApiError } from '../lib/apiClient'
 import type { ChatMessage, ChatRequest, ChatResponse } from '../types'
 
+// Caps the conversation resent on every message - bounds token cost for a
+// long-running chat while keeping enough recent context for follow-ups
+// (e.g. answering a clarifying question).
+const MAX_HISTORY_MESSAGES = 12
+
 function todayIso(): string {
   const now = new Date()
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -30,7 +35,10 @@ export function useAgentChat() {
     setIsLoading(true)
     setError(null)
 
-    const body: ChatRequest = { messages: nextHistory, current_date: todayIso() }
+    const body: ChatRequest = {
+      messages: nextHistory.slice(-MAX_HISTORY_MESSAGES),
+      current_date: todayIso(),
+    }
 
     try {
       const response = await apiClient.post<ChatResponse>('/agent/chat', body)

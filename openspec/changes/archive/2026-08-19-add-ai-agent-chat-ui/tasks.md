@@ -24,13 +24,13 @@
 
 ## 5. Manual verification
 
-- [ ] 5.1 Send "Hoy gasté 50.000 en gasolina para el carro" - confirm a Gasto proposal card appears with the right monto/fecha/descripcion, confirm it, verify it appears in `/gastos` and the Dashboard's totals update
-- [ ] 5.2 Send the mortgage debt example - confirm a Concepto (deuda) proposal card with amortization fields, confirm it, verify it appears in `/deudas`
-- [ ] 5.3 Send an incomplete message, confirm the widget shows the clarifying question as a chat message (not a card), reply to it, confirm the follow-up produces a proper proposal
-- [ ] 5.4 Register an abono for an existing debtor by name, confirm the proposal resolves to the right debtor
-- [ ] 5.5 Try an abono for a nonexistent debtor name, confirm a clarifying question instead of a broken proposal
-- [ ] 5.6 Edit a field in a proposal card before confirming, verify the edited value (not the original) is what gets saved
-- [ ] 5.7 Dismiss a proposal without confirming, verify nothing was created
+- [x] 5.1 Send "Hoy gasté 50.000 en gasolina para el carro" - confirm a Gasto proposal card appears with the right monto/fecha/descripcion, confirm it, verify it appears in `/gastos` and the Dashboard's totals update
+- [x] 5.2 Send the mortgage debt example - confirm a Concepto (deuda) proposal card with amortization fields, confirm it, verify it appears in `/deudas`
+- [x] 5.3 Send an incomplete message, confirm the widget shows the clarifying question as a chat message (not a card), reply to it, confirm the follow-up produces a proper proposal
+- [x] 5.4 Register an abono for an existing debtor by name, confirm the proposal resolves to the right debtor
+- [x] 5.5 Try an abono for a nonexistent debtor name, confirm a clarifying question instead of a broken proposal
+- [x] 5.6 Edit a field in a proposal card before confirming, verify the edited value (not the original) is what gets saved
+- [x] 5.7 Dismiss a proposal without confirming, verify nothing was created
 - [x] 5.8 Confirm the widget is present and usable from at least two different screens (e.g. Dashboard and Agenda) without losing its in-progress conversation when navigating between them
 - [x] 5.9 Check the widget and confirmation card in both dark and light mode
 - [x] 5.10 Check the widget doesn't visually collide with the mobile sidebar overlay or the Agenda's own "+ Agregar" floating control on a narrow viewport
