@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Leaf, LogOut, Menu, Moon, Palette, Sun } from 'lucide-react'
+import { LogOut, Menu, Moon, Palette, Sun } from 'lucide-react'
 import { AccentColorPicker } from './AccentColorPicker'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../hooks/useTheme'
+import wordmarkDark from '../assets/tobe-wordmark-dark.png'
+import wordmarkLight from '../assets/tobe-wordmark-light.png'
 
 export function Header({ onOpenMobileSidebar }: { onOpenMobileSidebar: () => void }) {
   const { user, signOut } = useAuth()
@@ -21,12 +23,12 @@ export function Header({ onOpenMobileSidebar }: { onOpenMobileSidebar: () => voi
         >
           <Menu className="h-4 w-4" strokeWidth={2} />
         </button>
-        <Link
-          to="/"
-          className="flex items-center gap-2 font-display text-xl font-semibold tracking-tight text-ink"
-        >
-          <Leaf className="h-5 w-5 text-accent" strokeWidth={2} />
-          <span className="hidden sm:inline">TOBE</span>
+        <Link to="/" aria-label="TOBE" className="flex items-center">
+          <img
+            src={theme === 'dark' ? wordmarkDark : wordmarkLight}
+            alt="TOBE"
+            className="h-6 w-auto"
+          />
         </Link>
       </div>
 

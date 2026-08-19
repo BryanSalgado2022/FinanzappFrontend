@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react'
 import { GoogleLogin } from '@react-oauth/google'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../hooks/useTheme'
+import wordmarkDark from '../assets/tobe-wordmark-dark.png'
+import wordmarkLight from '../assets/tobe-wordmark-light.png'
 
 const inputClass =
   'w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
@@ -57,11 +59,11 @@ export function Login() {
       />
 
       <div className="relative flex w-full max-w-xs flex-col items-center text-center">
-        <span className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-soft text-2xl">
-          🌿
-        </span>
-
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">TOBE</h1>
+        <img
+          src={theme === 'dark' ? wordmarkDark : wordmarkLight}
+          alt="TOBE"
+          className="mb-6 h-10 w-auto"
+        />
         <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">
           Tu presupuesto, llevado con calma.
           <br />
