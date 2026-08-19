@@ -225,3 +225,33 @@ export interface User {
   name: string
   picture?: string
 }
+
+export interface ChatMessage {
+  role: 'user' | 'model'
+  content: string
+}
+
+export interface ChatRequest {
+  messages: ChatMessage[]
+  current_date: string
+}
+
+export type AgentEntity = 'gasto' | 'concepto' | 'tarea' | 'deudor' | 'abono'
+
+export interface ProposedActionResponse {
+  type: 'proposed_action'
+  entity: AgentEntity
+  fields: Record<string, unknown>
+}
+
+export interface ClarificationNeededResponse {
+  type: 'clarification_needed'
+  message: string
+}
+
+export interface ReplyResponse {
+  type: 'reply'
+  message: string
+}
+
+export type ChatResponse = ProposedActionResponse | ClarificationNeededResponse | ReplyResponse

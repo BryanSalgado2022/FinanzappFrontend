@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
+import { AgentChatWidget } from './AgentChatWidget'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
 
@@ -39,6 +40,7 @@ export function AppShell() {
         <Header onOpenMobileSidebar={() => setMobileOpen(true)} />
         <Outlet />
       </div>
+      <AgentChatWidget />
     </div>
   )
 }
