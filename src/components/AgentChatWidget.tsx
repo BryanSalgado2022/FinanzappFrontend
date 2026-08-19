@@ -50,7 +50,7 @@ export function AgentChatWidget() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Abrir asistente"
-        className="fixed right-5 bottom-5 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-paper shadow-xl transition hover:opacity-90"
+        className="fixed right-5 bottom-5 z-[5] flex h-12 w-12 items-center justify-center rounded-full bg-accent text-paper shadow-xl transition hover:opacity-90"
       >
         <MessageCircle className="h-5 w-5" strokeWidth={2} />
       </button>
@@ -58,7 +58,7 @@ export function AgentChatWidget() {
   }
 
   return (
-    <div className="fixed right-5 bottom-5 z-30 flex h-[32rem] w-[22rem] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-3xl border border-line bg-paper-raised shadow-2xl">
+    <div className="fixed right-5 bottom-5 z-[5] flex h-[32rem] w-[22rem] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-3xl border border-line bg-paper-raised shadow-2xl">
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <p className="font-display text-base font-medium text-ink">Asistente</p>
         <button
