@@ -36,7 +36,25 @@ Requiere que `FinanzappBackend` esté corriendo (ver su README) y que su `CORS_O
 npm run build   # tsc -b && vite build -> dist/
 ```
 
-Salida estática estándar de Vite, compatible con Vercel sin configuración adicional. Variables de entorno (`VITE_API_BASE_URL`, `VITE_GOOGLE_CLIENT_ID`) se configuran por ambiente en Vercel, nunca hardcodeadas.
+Salida estática estándar de Vite. La app usa `BrowserRouter` (rutas reales como `/agenda`, `/concepts/3`), así que un host estático necesita servir `index.html` para cualquier ruta que no sea un archivo real — `vercel.json` ya trae esa regla de rewrite.
+
+## Despliegue
+
+Pensado para Vercel. `vercel.json` ya trae la regla de rewrite necesaria para que el ruteo de `BrowserRouter` funcione en recargas directas de rutas anidadas.
+
+Pasos (los haces tú desde el dashboard de Vercel, no algo que se automatice desde este repo):
+
+1. Conecta este repositorio de GitHub a un nuevo proyecto de Vercel (el framework se detecta solo como Vite).
+2. Configura estas variables de entorno en el proyecto (Vite solo las incluye en el build, no en runtime — deben estar puestas *antes* del primer build de producción):
+
+   | Variable | Valor en Vercel |
+   |---|---|
+   | `VITE_API_BASE_URL` | La URL de producción del backend en Railway, una vez desplegado |
+   | `VITE_GOOGLE_CLIENT_ID` | El mismo valor que tu `.env` local (mismo proyecto de Google OAuth), salvo que crees uno de producción aparte — si lo haces, agrega también la URL de producción de Vercel como origen autorizado en Google Cloud Console |
+
+3. **Secuencia con el backend**: la URL de Vercel y la de Railway se necesitan mutuamente (`VITE_API_BASE_URL` acá, `CORS_ORIGINS` allá). Despliega primero el backend (ver su README), copia su URL, y despliégate aquí con esa URL. Luego vuelve al backend y agrega la URL de este proyecto a su `CORS_ORIGINS`.
+
+Un workflow de CI (`.github/workflows/frontend-build.yml`) corre `tsc -b && vite build` en cada push a `main` y en cada PR — no despliega nada, solo evita que código roto llegue a `main`. El despliegue en sí lo dispara la propia integración de Vercel con GitHub, una vez conectada.
 
 ## Estructura
 
