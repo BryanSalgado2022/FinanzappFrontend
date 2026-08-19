@@ -61,7 +61,7 @@ export function Login() {
           🌿
         </span>
 
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">Finanzapp</h1>
+        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">TOBE</h1>
         <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">
           Tu presupuesto, llevado con calma.
           <br />

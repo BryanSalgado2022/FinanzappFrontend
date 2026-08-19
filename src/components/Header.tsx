@@ -26,7 +26,7 @@ export function Header({ onOpenMobileSidebar }: { onOpenMobileSidebar: () => voi
           className="flex items-center gap-2 font-display text-xl font-semibold tracking-tight text-ink"
         >
           <Leaf className="h-5 w-5 text-accent" strokeWidth={2} />
-          <span className="hidden sm:inline">Finanzapp</span>
+          <span className="hidden sm:inline">TOBE</span>
         </Link>
       </div>
 
