@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Landmark, Plus, Receipt, TrendingUp, Wallet } from 'lucide-react'
 import { AddMenu } from '../components/AddMenu'
@@ -7,11 +7,13 @@ import { NewExpenseForm } from '../components/NewExpenseForm'
 import { AnnualTrendChart } from '../components/AnnualTrendChart'
 import { ConceptTypeTable } from '../components/ConceptTypeTable'
 import { MonthlyBalanceBreakdown } from '../components/MonthlyBalanceBreakdown'
+import { PaymentPriorityCard } from '../components/PaymentPriorityCard'
 import { useSummary } from '../hooks/useSummary'
 import { useAnnualTrend } from '../hooks/useAnnualTrend'
 import { useDashboardConcepts } from '../hooks/useDashboardConcepts'
 import { useGastos } from '../hooks/useGastos'
 import { formatCOP, formatFecha, monthName } from '../lib/format'
+import { computePaymentPriority } from '../lib/paymentPriority'
 import type { TipoConcepto } from '../types'
 
 const now = new Date()
@@ -29,6 +31,7 @@ export function Dashboard() {
   const annualTrend = useAnnualTrend(anio)
   const { rows, isLoading: rowsLoading } = useDashboardConcepts(anio, mes)
   const gastos = useGastos(anio, mes)
+  const paymentPriority = useMemo(() => computePaymentPriority(rows, now), [rows])
 
   const goToPreviousMonth = () => {
     if (mes === 1) {
@@ -131,6 +134,8 @@ export function Dashboard() {
             )}
           </div>
         </div>
+
+        <PaymentPriorityCard entries={paymentPriority} today={now} />
 
         <div>
           <div className="mb-3 flex items-center justify-between">
