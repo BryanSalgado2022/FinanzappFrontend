@@ -6,6 +6,7 @@ import { NewConceptForm } from '../components/NewConceptForm'
 import { NewExpenseForm } from '../components/NewExpenseForm'
 import { AnnualTrendChart } from '../components/AnnualTrendChart'
 import { ConceptTypeTable } from '../components/ConceptTypeTable'
+import { MonthlyBalanceBreakdown } from '../components/MonthlyBalanceBreakdown'
 import { useSummary } from '../hooks/useSummary'
 import { useAnnualTrend } from '../hooks/useAnnualTrend'
 import { useDashboardConcepts } from '../hooks/useDashboardConcepts'
@@ -22,6 +23,7 @@ export function Dashboard() {
   const [newConceptTipo, setNewConceptTipo] = useState<TipoConcepto>('gasto_fijo')
   const [showNewExpense, setShowNewExpense] = useState(false)
   const [addMenuOpen, setAddMenuOpen] = useState(false)
+  const [showBalanceDetail, setShowBalanceDetail] = useState(false)
 
   const summary = useSummary(anio, mes)
   const annualTrend = useAnnualTrend(anio)
@@ -79,8 +81,10 @@ export function Dashboard() {
         </div>
 
         <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-6">
-          <div
-            className={`rounded-3xl border p-6 text-center shadow-sm lg:col-span-4 lg:text-left ${
+          <button
+            type="button"
+            onClick={() => setShowBalanceDetail(true)}
+            className={`rounded-3xl border p-6 text-center shadow-sm transition hover:opacity-90 lg:col-span-4 lg:text-left ${
               isPositive ? 'border-accent/25 bg-accent-soft' : 'border-danger/25 bg-danger-soft'
             }`}
           >
@@ -107,7 +111,7 @@ export function Dashboard() {
                 </p>
               </div>
             </div>
-          </div>
+          </button>
 
           <div className="mt-8 lg:col-span-8 lg:mt-0">
             <div className="mb-3 flex items-center justify-between">
@@ -233,6 +237,15 @@ export function Dashboard() {
         />
       )}
       {showNewExpense && <NewExpenseForm onDone={() => setShowNewExpense(false)} />}
+      {showBalanceDetail && (
+        <MonthlyBalanceBreakdown
+          anio={anio}
+          mes={mes}
+          rows={rows}
+          gastos={gastos.data ?? []}
+          onDone={() => setShowBalanceDetail(false)}
+        />
+      )}
     </>
   )
 }
