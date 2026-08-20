@@ -15,10 +15,16 @@ const TIPO_OPTIONS: { value: TipoConcepto; label: string; Icon: typeof Landmark 
 const inputClass =
   'w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
 
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1)
+const YEAR_OPTIONS = Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i)
+
 // Keeps only digits and a single decimal point - blocks letters, signs, and
 // extra dots so the field can never hold anything but a plain percentage.
+// Some mobile keyboards offer "," instead of "." as the decimal key
+// (locale-dependent), so a comma is treated the same as a period rather
+// than silently dropped.
 function sanitizeTasaInteres(raw: string): string {
-  const cleaned = raw.replace(/[^0-9.]/g, '')
+  const cleaned = raw.replace(',', '.').replace(/[^0-9.]/g, '')
   const firstDot = cleaned.indexOf('.')
   if (firstDot === -1) return cleaned
   return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '')
@@ -50,6 +56,9 @@ export function NewConceptForm({
   const [diaVencimiento, setDiaVencimiento] = useState(
     initialDiaVencimiento !== undefined ? String(initialDiaVencimiento) : '',
   )
+  const [showStartMonth, setShowStartMonth] = useState(false)
+  const [startAnio, setStartAnio] = useState(anio)
+  const [startMes, setStartMes] = useState(mes)
   const createConcept = useCreateConcept()
 
   const tieneAmortizacion = tipo === 'deuda' && tasaInteres !== '' && numeroCuotas !== ''
@@ -76,8 +85,8 @@ export function NewConceptForm({
           puedeTenerDiaVencimiento && diaVencimiento !== ''
             ? Math.min(28, Math.max(1, Number(diaVencimiento)))
             : undefined,
-        anio,
-        mes,
+        anio: showStartMonth ? startAnio : anio,
+        mes: showStartMonth ? startMes : mes,
       },
       { onSuccess: onDone },
     )
@@ -129,6 +138,52 @@ export function NewConceptForm({
             </button>
           ))}
         </div>
+
+        {!showStartMonth ? (
+          <button
+            type="button"
+            onClick={() => setShowStartMonth(true)}
+            className="text-left text-xs text-ink-muted underline decoration-dotted hover:text-ink"
+          >
+            ¿Empieza en otro mes?
+          </button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <select
+              value={startMes}
+              onChange={(e) => setStartMes(Number(e.target.value))}
+              className={`${inputClass} !w-auto`}
+            >
+              {MONTH_OPTIONS.map((m) => (
+                <option key={m} value={m}>
+                  {monthName(m)}
+                </option>
+              ))}
+            </select>
+            <select
+              value={startAnio}
+              onChange={(e) => setStartAnio(Number(e.target.value))}
+              className={`${inputClass} !w-auto`}
+            >
+              {YEAR_OPTIONS.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => {
+                setShowStartMonth(false)
+                setStartAnio(anio)
+                setStartMes(mes)
+              }}
+              className="text-xs text-ink-muted underline decoration-dotted hover:text-ink"
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
 
         <CategoryPicker selectedIds={categoriaIds} onChange={setCategoriaIds} />
 
