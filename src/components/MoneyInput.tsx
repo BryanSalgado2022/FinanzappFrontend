@@ -6,17 +6,22 @@ function groupThousands(digits: string): string {
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 }
 
-function digitsBeforeIndex(str: string, index: number): number {
-  return (str.slice(0, index).match(/\d/g) ?? []).length
+// Counts digits *and* the decimal comma (never the grouping dots) - the
+// comma has to count as a position too, otherwise restoring the cursor
+// right after a freshly-typed separator lands it one character too early
+// (before the comma instead of after it), so digits typed next get
+// inserted on the wrong side of the separator.
+function significantCharsBeforeIndex(str: string, index: number): number {
+  return (str.slice(0, index).match(/[\d,]/g) ?? []).length
 }
 
-function indexAfterDigits(str: string, digitCount: number): number {
-  if (digitCount <= 0) return 0
-  let count = 0
+function indexAfterSignificantChars(str: string, count: number): number {
+  if (count <= 0) return 0
+  let seen = 0
   for (let i = 0; i < str.length; i++) {
-    if (/\d/.test(str[i])) {
-      count += 1
-      if (count === digitCount) return i + 1
+    if (/[\d,]/.test(str[i])) {
+      seen += 1
+      if (seen === count) return i + 1
     }
   }
   return str.length
@@ -47,7 +52,7 @@ export function MoneyInput({
 
   useLayoutEffect(() => {
     if (pendingCursorDigits.current !== null && ref.current) {
-      const pos = indexAfterDigits(displayValue, pendingCursorDigits.current)
+      const pos = indexAfterSignificantChars(displayValue, pendingCursorDigits.current)
       ref.current.setSelectionRange(pos, pos)
       pendingCursorDigits.current = null
     }
@@ -57,9 +62,21 @@ export function MoneyInput({
     const input = event.target
     const raw = input.value
     const cursor = input.selectionStart ?? raw.length
-    pendingCursorDigits.current = digitsBeforeIndex(raw, cursor)
 
-    const cleaned = raw.replace(/[^\d,]/g, '')
+    // Some mobile keyboards show "." instead of "," for the decimal key
+    // (locale-dependent). "." already means "thousands group" in this
+    // field's display, so only the period the user just pressed (not any
+    // pre-existing grouping dots) gets reinterpreted as the decimal mark -
+    // detected via the native InputEvent rather than guessed from raw.
+    const typedChar = (event.nativeEvent as InputEvent).data
+    const normalized =
+      typedChar === '.' && !raw.includes(',') && raw[cursor - 1] === '.'
+        ? raw.slice(0, cursor - 1) + ',' + raw.slice(cursor)
+        : raw
+
+    pendingCursorDigits.current = significantCharsBeforeIndex(normalized, cursor)
+
+    const cleaned = normalized.replace(/[^\d,]/g, '')
     const firstComma = cleaned.indexOf(',')
     const intPart = firstComma === -1 ? cleaned : cleaned.slice(0, firstComma)
     const decPart = firstComma === -1 ? '' : cleaned.slice(firstComma + 1).replace(/,/g, '')
