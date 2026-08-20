@@ -96,6 +96,7 @@ export function Agenda() {
   }
 
   const yearOptions = Array.from({ length: 11 }, (_, i) => now.getFullYear() - 5 + i)
+  const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1)
 
   const diaSeleccionado = selectedDate ? Number(selectedDate.split('-')[2]) : null
 
@@ -111,9 +112,20 @@ export function Agenda() {
           >
             <ChevronLeft className="h-4 w-4" strokeWidth={2} />
           </button>
-          <span className="min-w-32 text-center font-display text-2xl font-medium text-ink">
-            {monthName(mes)}
-          </span>
+          <select
+            value={mes}
+            onChange={(e) => {
+              setSelectedDate(null)
+              setMes(Number(e.target.value))
+            }}
+            className="rounded-full border border-line bg-paper px-2 py-1 text-center font-display text-base font-medium text-ink"
+          >
+            {monthOptions.map((m) => (
+              <option key={m} value={m}>
+                {monthName(m)}
+              </option>
+            ))}
+          </select>
           <select
             value={anio}
             onChange={(e) => {
