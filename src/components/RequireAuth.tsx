@@ -12,7 +12,7 @@ export function RequireAuth() {
 export function RedirectIfAuthenticated() {
   const { isAuthenticated } = useAuth()
   if (isAuthenticated) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/dashboard" replace />
   }
   return <Outlet />
 }

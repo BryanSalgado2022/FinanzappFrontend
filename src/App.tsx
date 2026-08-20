@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { RequireAuth, RedirectIfAuthenticated } from './components/RequireAuth'
 import { AppShell } from './components/AppShell'
+import { Landing } from './pages/Landing'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
 import { Agenda } from './pages/Agenda'
@@ -31,11 +32,12 @@ export function App() {
   return (
     <Routes>
       <Route element={<RedirectIfAuthenticated />}>
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
       </Route>
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/agenda" element={<Agenda />} />
           <Route path="/concepts/:id" element={<ConceptDetail />} />
           <Route path="/deudas" element={<Deudas />} />

@@ -23,7 +23,7 @@ export function Header({ onOpenMobileSidebar }: { onOpenMobileSidebar: () => voi
         >
           <Menu className="h-4 w-4" strokeWidth={2} />
         </button>
-        <Link to="/" aria-label="TOBE" className="flex items-center">
+        <Link to="/dashboard" aria-label="TOBE" className="flex items-center">
           <img
             src={theme === 'dark' ? wordmarkDark : wordmarkLight}
             alt="TOBE"

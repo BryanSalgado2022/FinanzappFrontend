@@ -94,7 +94,7 @@ export function ConceptDetail() {
   }
 
   const handleFinish = () => updateConcept.mutate({ activo: false })
-  const handleDelete = () => deleteConcept.mutate(undefined, { onSuccess: () => navigate('/') })
+  const handleDelete = () => deleteConcept.mutate(undefined, { onSuccess: () => navigate('/dashboard') })
 
   return (
     <>

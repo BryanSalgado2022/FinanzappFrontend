@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 
 const LINKS = [
-  { to: '/', end: true, label: 'Dashboard', Icon: LayoutDashboard },
+  { to: '/dashboard', end: true, label: 'Dashboard', Icon: LayoutDashboard },
   { to: '/agenda', end: false, label: 'Agenda', Icon: CalendarDays },
   { to: '/deudas', end: false, label: 'Deudas', Icon: Wallet },
   { to: '/categorias', end: false, label: 'Categorías', Icon: Tag },
