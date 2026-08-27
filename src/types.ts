@@ -176,11 +176,13 @@ export interface Abono {
   id: number
   monto: string
   fecha: string
+  interes: string | null
 }
 
 export interface AbonoCreateInput {
   monto: string
   fecha: string
+  interes?: string
 }
 
 export interface Gasto {

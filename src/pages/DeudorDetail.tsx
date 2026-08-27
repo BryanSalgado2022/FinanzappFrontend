@@ -51,6 +51,8 @@ export function DeudorDetail() {
 
   const [abonoMonto, setAbonoMonto] = useState('')
   const [abonoFecha, setAbonoFecha] = useState('')
+  const [abonoInteres, setAbonoInteres] = useState('')
+  const [abonoError, setAbonoError] = useState<string | null>(null)
 
   const deudor = useDeudor(deudorId)
   const abonos = useAbonos(deudorId)
@@ -81,9 +83,14 @@ export function DeudorDetail() {
 
   const handleCreateAbono = (event: FormEvent) => {
     event.preventDefault()
+    setAbonoError(null)
+    if (abonoInteres !== '' && Number(abonoInteres) > Number(abonoMonto)) {
+      setAbonoError('El interés no puede ser mayor que el monto pagado.')
+      return
+    }
     createAbono.mutate(
-      { monto: abonoMonto, fecha: abonoFecha },
-      { onSuccess: () => { setAbonoMonto(''); setAbonoFecha('') } },
+      { monto: abonoMonto, fecha: abonoFecha, interes: abonoInteres || undefined },
+      { onSuccess: () => { setAbonoMonto(''); setAbonoFecha(''); setAbonoInteres('') } },
     )
   }
 
@@ -219,28 +226,37 @@ export function DeudorDetail() {
 
         <div>
           <h2 className="mb-3 font-display text-lg font-medium text-ink">Registrar abono</h2>
-          <form onSubmit={handleCreateAbono} className="flex gap-2">
+          <form onSubmit={handleCreateAbono} className="space-y-2">
+            <div className="flex gap-2">
+              <MoneyInput
+                placeholder="Monto"
+                value={abonoMonto}
+                onChange={setAbonoMonto}
+                className={inputClass}
+                required
+              />
+              <input
+                required
+                type="date"
+                value={abonoFecha}
+                onChange={(e) => setAbonoFecha(e.target.value)}
+                className={inputClass}
+              />
+              <button
+                type="submit"
+                disabled={createAbono.isPending}
+                className="shrink-0 rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:opacity-90 disabled:opacity-50"
+              >
+                Guardar
+              </button>
+            </div>
             <MoneyInput
-              placeholder="Monto"
-              value={abonoMonto}
-              onChange={setAbonoMonto}
-              className={inputClass}
-              required
-            />
-            <input
-              required
-              type="date"
-              value={abonoFecha}
-              onChange={(e) => setAbonoFecha(e.target.value)}
+              placeholder="¿Cuánto de este pago es interés? (opcional)"
+              value={abonoInteres}
+              onChange={setAbonoInteres}
               className={inputClass}
             />
-            <button
-              type="submit"
-              disabled={createAbono.isPending}
-              className="shrink-0 rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:opacity-90 disabled:opacity-50"
-            >
-              Guardar
-            </button>
+            {abonoError && <p className="text-sm text-danger">{abonoError}</p>}
           </form>
         </div>
 
