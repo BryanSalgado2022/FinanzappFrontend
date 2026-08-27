@@ -140,24 +140,37 @@ export function Dashboard() {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-lg font-medium text-ink">Gastos variables del mes</h2>
-            <div className="relative">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setAddMenuOpen((v) => !v)}
-                className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-paper transition hover:opacity-90"
-              >
-                <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-                Agregar
-              </button>
-              <AddMenu
-                open={addMenuOpen}
-                onClose={() => setAddMenuOpen(false)}
-                onSelectGasto={() => setShowNewExpense(true)}
-                onSelectConcepto={(tipo) => {
-                  setNewConceptTipo(tipo)
+                onClick={() => {
+                  setNewConceptTipo('ingreso')
                   setShowNewConcept(true)
                 }}
-              />
+                className="flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-sm font-medium text-ink transition hover:bg-accent-soft"
+              >
+                <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+                Agregar ingreso
+              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAddMenuOpen((v) => !v)}
+                  className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-paper transition hover:opacity-90"
+                >
+                  <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  Agregar gasto
+                </button>
+                <AddMenu
+                  open={addMenuOpen}
+                  onClose={() => setAddMenuOpen(false)}
+                  onSelectGasto={() => setShowNewExpense(true)}
+                  onSelectConcepto={(tipo) => {
+                    setNewConceptTipo(tipo)
+                    setShowNewConcept(true)
+                  }}
+                />
+              </div>
             </div>
           </div>
 

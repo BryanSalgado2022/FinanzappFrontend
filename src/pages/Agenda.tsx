@@ -164,7 +164,18 @@ export function Agenda() {
 
         {selectedDate && (
           <div>
-            <div className="mb-3 flex items-center justify-end">
+            <div className="mb-3 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setNewConceptTipo('ingreso')
+                  setShowNewConcept(true)
+                }}
+                className="flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-sm font-medium text-ink transition hover:bg-accent-soft"
+              >
+                <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+                Agregar ingreso
+              </button>
               <div className="relative">
                 <button
                   type="button"
@@ -172,7 +183,7 @@ export function Agenda() {
                   className="flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-paper transition hover:opacity-90"
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-                  Agregar
+                  Agregar gasto
                 </button>
                 <AddMenu
                   open={addMenuOpen}

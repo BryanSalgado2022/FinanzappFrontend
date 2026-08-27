@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { CheckSquare, Landmark, Receipt, ShoppingBag, TrendingUp } from 'lucide-react'
+import { CheckSquare, Landmark, Receipt, ShoppingBag } from 'lucide-react'
 import type { TipoConcepto } from '../types'
 
 interface AddMenuProps {
@@ -29,7 +29,6 @@ export function AddMenu({ open, onClose, onSelectGasto, onSelectConcepto, onSele
     ...(onSelectTarea ? [{ label: 'Tarea', Icon: CheckSquare, onSelect: onSelectTarea }] : []),
     { label: 'Deuda', Icon: Landmark, onSelect: () => onSelectConcepto('deuda') },
     { label: 'Pago mensual', Icon: Receipt, onSelect: () => onSelectConcepto('gasto_fijo') },
-    { label: 'Ingreso', Icon: TrendingUp, onSelect: () => onSelectConcepto('ingreso') },
   ]
 
   return (
