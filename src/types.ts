@@ -220,7 +220,7 @@ export interface UserRead {
 export interface UserUpdateInput {
   color_acento?: string | null
   ahorros?: string | null
-  saldo_disponible_inicial?: string
+  saldo_disponible_inicial?: string | null
 }
 
 export interface DisponibleRead {

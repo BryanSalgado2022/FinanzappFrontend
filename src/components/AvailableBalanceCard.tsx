@@ -37,6 +37,13 @@ export function AvailableBalanceCard() {
     )
   }
 
+  const clearDisponible = () => {
+    updatePrefs.mutate(
+      { saldo_disponible_inicial: null },
+      { onSuccess: () => setEditingDisponible(false) },
+    )
+  }
+
   const startEditingAhorros = () => {
     setAhorrosDraft(user.data!.ahorros ?? '')
     setEditingAhorros(true)
@@ -77,6 +84,16 @@ export function AvailableBalanceCard() {
             >
               Cancelar
             </button>
+            {isConfigured && (
+              <button
+                type="button"
+                onClick={clearDisponible}
+                disabled={updatePrefs.isPending}
+                className="rounded-full px-3.5 py-1.5 text-xs text-danger hover:opacity-80 disabled:opacity-50"
+              >
+                Quitar
+              </button>
+            )}
           </div>
         </div>
       ) : !isConfigured ? (
