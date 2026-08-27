@@ -6,7 +6,7 @@ Gives the user a single calendar view of everything with a date across the app -
 ## Requirements
 
 ### Requirement: Dedicated Agenda screen
-The system SHALL provide a dedicated Agenda screen, reachable from the Sidebar, showing a full month-grid calendar for a selected year and month.
+The system SHALL provide a dedicated Agenda screen, reachable from the Sidebar, showing a full month-grid calendar for a selected year and month. In addition to the previous/next-month arrows and the year selector, the system SHALL provide a month selector letting the user jump directly to any month within the selected year in one action.
 
 #### Scenario: Navigating to the Agenda
 - **WHEN** the user activates the Agenda link in the Sidebar
@@ -15,6 +15,10 @@ The system SHALL provide a dedicated Agenda screen, reachable from the Sidebar, 
 #### Scenario: Month and year navigation
 - **WHEN** the user navigates to the previous or next month, or selects a different year
 - **THEN** the calendar updates to show that month, and its events reload
+
+#### Scenario: Jumping directly to a month
+- **WHEN** the user selects a different month from the month selector
+- **THEN** the calendar updates to show that month within the currently selected year, and its events reload, without requiring repeated clicks on the previous/next arrows
 
 ### Requirement: Calendar days show which categories of event occurred
 The system SHALL mark each day in the grid that has at least one event, distinguishing which categories are present (debt/income due day, variable expense, task, debtor activity) via a legend.
@@ -87,7 +91,7 @@ The system SHALL let the user select a day in the calendar to see a list of that
 - **THEN** the app shows that day's event list as empty, without an error
 
 ### Requirement: Quick-entry from a calendar day
-The system SHALL let the user create a variable expense, task, debt, monthly payment, or income concept directly from a selected calendar day, pre-filling that day's date (or due day, for concepts) into the corresponding existing creation form.
+The system SHALL let the user create a variable expense, task, debt, monthly payment, or income concept directly from a selected calendar day, pre-filling that day's date (or due day, for concepts) into the corresponding existing creation form. Income SHALL be reachable via its own dedicated control, separate from the menu covering variable expense, task, debt, and monthly payment.
 
 #### Scenario: Creating a variable expense from a day
 - **WHEN** the user chooses to add a variable expense from a selected day
@@ -98,8 +102,12 @@ The system SHALL let the user create a variable expense, task, debt, monthly pay
 - **THEN** the task creation form opens with that day's date already filled in
 
 #### Scenario: Creating a concept from a day
-- **WHEN** the user chooses to add a debt, monthly payment, or income concept from a selected day
+- **WHEN** the user chooses to add a debt or monthly payment concept from a selected day
 - **THEN** the concept creation form opens for the viewed month, with that day pre-filled as the due day
+
+#### Scenario: Creating an income concept from a day
+- **WHEN** the user activates the dedicated income control for a selected day
+- **THEN** the income concept creation form opens directly for the viewed month, with that day pre-filled as the due day, without an intermediate menu
 
 #### Scenario: Debtors and abonos are not creatable from the Agenda
 - **WHEN** the user is choosing what to add from a selected day
