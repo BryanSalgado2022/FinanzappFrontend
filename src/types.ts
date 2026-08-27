@@ -212,10 +212,20 @@ export interface UserRead {
   email: string
   name: string
   color_acento: string | null
+  ahorros: string | null
+  saldo_disponible_inicial: string | null
+  saldo_disponible_fecha: string | null
 }
 
 export interface UserUpdateInput {
-  color_acento: string | null
+  color_acento?: string | null
+  ahorros?: string | null
+  saldo_disponible_inicial?: string
+}
+
+export interface DisponibleRead {
+  disponible: string | null
+  saldo_disponible_fecha: string | null
 }
 
 // The backend has no "get current user" endpoint and its JWT payload only

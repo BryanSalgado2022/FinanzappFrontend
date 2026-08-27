@@ -23,3 +23,19 @@ export function useUpdateAccentColor() {
     },
   })
 }
+
+// Separate from useUpdateAccentColor because editing ahorros/saldo_disponible_inicial
+// also needs to refresh the Disponible figure - the backend re-dates
+// saldo_disponible_fecha as a side effect of this same request (see
+// FinanzappBackend's add-available-balance), so the query must refetch even
+// though the mutation body didn't touch it directly.
+export function useUpdateUserPreferences() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: UserUpdateInput) => apiClient.patch<UserRead>('/users/me', input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: meKey })
+      void queryClient.invalidateQueries({ queryKey: ['summary', 'disponible'] })
+    },
+  })
+}

@@ -8,6 +8,7 @@ import { AnnualTrendChart } from '../components/AnnualTrendChart'
 import { ConceptTypeTable } from '../components/ConceptTypeTable'
 import { MonthlyBalanceBreakdown } from '../components/MonthlyBalanceBreakdown'
 import { PaymentPriorityCard } from '../components/PaymentPriorityCard'
+import { AvailableBalanceCard } from '../components/AvailableBalanceCard'
 import { useSummary } from '../hooks/useSummary'
 import { useAnnualTrend } from '../hooks/useAnnualTrend'
 import { useDashboardConcepts } from '../hooks/useDashboardConcepts'
@@ -84,10 +85,11 @@ export function Dashboard() {
         </div>
 
         <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-6">
+          <div className="space-y-4 lg:col-span-4">
           <button
             type="button"
             onClick={() => setShowBalanceDetail(true)}
-            className={`rounded-3xl border p-6 text-center shadow-sm transition hover:opacity-90 lg:col-span-4 lg:text-left ${
+            className={`w-full rounded-3xl border p-6 text-center shadow-sm transition hover:opacity-90 lg:text-left ${
               isPositive ? 'border-accent/25 bg-accent-soft' : 'border-danger/25 bg-danger-soft'
             }`}
           >
@@ -115,6 +117,9 @@ export function Dashboard() {
               </div>
             </div>
           </button>
+
+          <AvailableBalanceCard />
+          </div>
 
           <div className="mt-8 lg:col-span-8 lg:mt-0">
             <div className="mb-3 flex items-center justify-between">
