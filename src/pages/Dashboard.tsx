@@ -8,7 +8,7 @@ import { AnnualTrendChart } from '../components/AnnualTrendChart'
 import { ConceptTypeTable } from '../components/ConceptTypeTable'
 import { MonthlyBalanceBreakdown } from '../components/MonthlyBalanceBreakdown'
 import { PaymentPriorityCard } from '../components/PaymentPriorityCard'
-import { AvailableBalanceCard } from '../components/AvailableBalanceCard'
+import { SavingsCard } from '../components/SavingsCard'
 import { useSummary } from '../hooks/useSummary'
 import { useAnnualTrend } from '../hooks/useAnnualTrend'
 import { useDashboardConcepts } from '../hooks/useDashboardConcepts'
@@ -118,7 +118,7 @@ export function Dashboard() {
             </div>
           </button>
 
-          <AvailableBalanceCard />
+          <SavingsCard />
           </div>
 
           <div className="mt-8 lg:col-span-8 lg:mt-0">
