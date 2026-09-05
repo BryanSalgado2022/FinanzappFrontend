@@ -162,6 +162,11 @@ export interface Deudor {
   monto_total: string
   fecha: string
   garantia: string | null
+  tasa_interes: string | null
+  periodo_tasa: PeriodoTasa | null
+  numero_cuotas: number | null
+  cuota_fija: string | null
+  cuota_inicial: number | null
   activo: boolean
   finalizado_en: string | null
   saldo_restante: string
@@ -172,6 +177,40 @@ export interface DeudorCreateInput {
   monto_total: string
   fecha: string
   garantia?: string
+  // Amortization terms (optional). tasa_interes and numero_cuotas must be
+  // provided together. cuota_inicial requires both and is immutable after
+  // creation - mirrors ConceptoCreateInput.
+  tasa_interes?: string
+  periodo_tasa?: PeriodoTasa
+  numero_cuotas?: number
+  cuota_inicial?: number
+}
+
+// All four required together - PUT /deudores/{id}/amortizacion always
+// replaces the full term set and recalculates the schedule. cuota_inicial
+// is deliberately never part of this - it stays permanently locked.
+export interface DeudorAmortizacionUpdateInput {
+  monto_total: string
+  tasa_interes: string
+  periodo_tasa: PeriodoTasa
+  numero_cuotas: number
+}
+
+export interface CuotaDeudor {
+  id: number
+  deudor_id: number
+  anio: number
+  mes: number
+  monto_planeado: string
+  monto_pagado: string | null
+  pagado: boolean
+  fecha_pago: string | null
+  interes: string | null
+}
+
+export interface CuotaDeudorUpdateInput {
+  monto_pagado?: string
+  pagado: boolean
 }
 
 export interface DeudorUpdateInput {

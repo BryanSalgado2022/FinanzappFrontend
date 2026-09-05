@@ -1,10 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../lib/apiClient'
-import type { Abono, AbonoCreateInput, Deudor, DeudorCreateInput, DeudorUpdateInput } from '../types'
+import type {
+  Abono,
+  AbonoCreateInput,
+  CuotaDeudor,
+  CuotaDeudorUpdateInput,
+  Deudor,
+  DeudorAmortizacionUpdateInput,
+  DeudorCreateInput,
+  DeudorUpdateInput,
+} from '../types'
 
 const deudoresKey = ['deudores'] as const
 const deudorKey = (id: number) => ['deudores', id] as const
 const abonosKey = (deudorId: number) => ['deudores', deudorId, 'abonos'] as const
+const cuotasKey = (deudorId: number) => ['deudores', deudorId, 'cuotas'] as const
 
 export function useDeudores() {
   return useQuery({
@@ -79,6 +89,41 @@ export function useDeleteAbono(deudorId: number, abonoId: number) {
       void queryClient.invalidateQueries({ queryKey: abonosKey(deudorId) })
       void queryClient.invalidateQueries({ queryKey: deudorKey(deudorId) })
       void queryClient.invalidateQueries({ queryKey: deudoresKey })
+    },
+  })
+}
+
+export function useCuotasDeudor(deudorId: number) {
+  return useQuery({
+    queryKey: cuotasKey(deudorId),
+    queryFn: () => apiClient.get<CuotaDeudor[]>(`/deudores/${deudorId}/cuotas`),
+  })
+}
+
+export function useMarkCuota(deudorId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ anio, mes, ...input }: CuotaDeudorUpdateInput & { anio: number; mes: number }) =>
+      apiClient.patch<CuotaDeudor>(`/deudores/${deudorId}/cuotas/${anio}/${mes}`, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: cuotasKey(deudorId) })
+      void queryClient.invalidateQueries({ queryKey: deudorKey(deudorId) })
+      void queryClient.invalidateQueries({ queryKey: deudoresKey })
+      void queryClient.invalidateQueries({ queryKey: ['summary'] })
+    },
+  })
+}
+
+export function useUpdateAmortizacionDeudor(id: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: DeudorAmortizacionUpdateInput) =>
+      apiClient.put<Deudor>(`/deudores/${id}/amortizacion`, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: deudoresKey })
+      void queryClient.invalidateQueries({ queryKey: deudorKey(id) })
+      void queryClient.invalidateQueries({ queryKey: cuotasKey(id) })
+      void queryClient.invalidateQueries({ queryKey: ['summary'] })
     },
   })
 }
