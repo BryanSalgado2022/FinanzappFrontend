@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../lib/apiClient'
-import type { Concepto, ConceptoCreateInput, ConceptoUpdateInput } from '../types'
+import type { Concepto, ConceptoAmortizacionUpdateInput, ConceptoCreateInput, ConceptoUpdateInput } from '../types'
 
 const conceptsKey = ['concepts'] as const
 const conceptKey = (id: number) => ['concepts', id] as const
@@ -40,6 +40,20 @@ export function useUpdateConcept(id: number) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: conceptsKey })
       void queryClient.invalidateQueries({ queryKey: conceptKey(id) })
+    },
+  })
+}
+
+export function useUpdateAmortizacion(id: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: ConceptoAmortizacionUpdateInput) =>
+      apiClient.put<Concepto>(`/concepts/${id}/amortizacion`, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: conceptsKey })
+      void queryClient.invalidateQueries({ queryKey: conceptKey(id) })
+      void queryClient.invalidateQueries({ queryKey: ['concepts', id, 'entries'] })
+      void queryClient.invalidateQueries({ queryKey: ['summary'] })
     },
   })
 }

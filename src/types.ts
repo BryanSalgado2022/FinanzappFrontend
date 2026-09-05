@@ -66,6 +66,16 @@ export interface ConceptoUpdateInput {
   dia_vencimiento?: number
 }
 
+// All four required together - PUT /concepts/{id}/amortizacion always
+// replaces the full term set and recalculates the schedule. cuota_inicial
+// is deliberately never part of this - it stays permanently locked.
+export interface ConceptoAmortizacionUpdateInput {
+  valor_total: string
+  tasa_interes: string
+  periodo_tasa: PeriodoTasa
+  numero_cuotas: number
+}
+
 export interface EntradaMensual {
   id: number
   concepto_id: number

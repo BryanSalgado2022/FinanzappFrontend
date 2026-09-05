@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ChevronDown, ChevronLeft, ChevronRight, Pencil, CheckCircle2, Trash2 } from 'lucide-react'
 import { CategoryPicker } from '../components/CategoryPicker'
+import { MoneyInput } from '../components/MoneyInput'
 import { MonthEntryLegend, MonthEntryRow } from '../components/MonthEntryRow'
 import { ProgressRing } from '../components/ProgressRing'
-import { useConcept, useDeleteConcept, useUpdateConcept } from '../hooks/useConcepts'
+import { useConcept, useDeleteConcept, useUpdateAmortizacion, useUpdateConcept } from '../hooks/useConcepts'
 import { useConceptEntries, useDeleteEntry, useUpsertEntry } from '../hooks/useEntries'
 import { diaVencimientoLabel, formatCOP, quarterLabel, tipoDotClass, tipoLabel } from '../lib/format'
+import type { PeriodoTasa } from '../types'
 
 const now = new Date()
 const QUARTERS: { quarter: 1 | 2 | 3 | 4; months: number[] }[] = [
@@ -18,6 +20,16 @@ const QUARTERS: { quarter: 1 | 2 | 3 | 4; months: number[] }[] = [
 
 const inputClass =
   'w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
+
+// Keeps only digits and a single decimal point - blocks letters, signs, and
+// extra dots so the field can never hold anything but a plain percentage.
+// Mirrors NewConceptForm.tsx's sanitizer for consistent input behavior.
+function sanitizeTasaInteres(raw: string): string {
+  const cleaned = raw.replace(',', '.').replace(/[^0-9.]/g, '')
+  const firstDot = cleaned.indexOf('.')
+  if (firstDot === -1) return cleaned
+  return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '')
+}
 
 export function ConceptDetail() {
   const { id } = useParams<{ id: string }>()
@@ -35,6 +47,12 @@ export function ConceptDetail() {
   // toggleable per quarter - resets whenever the selected year changes so it
   // doesn't leak a stale "expanded" state in.
   const [trimestresExpandidos, setTrimestresExpandidos] = useState<Set<number>>(new Set())
+  const [editingTerminos, setEditingTerminos] = useState(false)
+  const [confirmingTerminos, setConfirmingTerminos] = useState(false)
+  const [valorTotalDraft, setValorTotalDraft] = useState('')
+  const [tasaInteresDraft, setTasaInteresDraft] = useState('')
+  const [periodoTasaDraft, setPeriodoTasaDraft] = useState<PeriodoTasa>('mensual')
+  const [numeroCuotasDraft, setNumeroCuotasDraft] = useState('')
 
   const concept = useConcept(conceptoId)
   const entries = useConceptEntries(conceptoId)
@@ -42,6 +60,7 @@ export function ConceptDetail() {
   const deleteEntry = useDeleteEntry(conceptoId)
   const updateConcept = useUpdateConcept(conceptoId)
   const deleteConcept = useDeleteConcept(conceptoId)
+  const updateAmortizacion = useUpdateAmortizacion(conceptoId)
 
   if (concept.isLoading || !concept.data) {
     return <p className="p-5 text-sm text-ink-muted">Cargando…</p>
@@ -59,6 +78,7 @@ export function ConceptDetail() {
   // Mirrors the backend's fixed-schedule condition (entry_service.py) - only
   // concepts without a generated schedule allow deleting an individual entry.
   const puedeEliminarse = c.duracion_meses === null && !(c.tasa_interes !== null && c.numero_cuotas !== null)
+  const mesesPendientes = (entries.data ?? []).filter((e) => !e.pagado).length
 
   const esAnioActual = anio === now.getFullYear()
   const mesActual = now.getMonth() + 1
@@ -91,6 +111,32 @@ export function ConceptDetail() {
     setCategoriaIdsDraft(c.categorias.map((cat) => cat.id))
     setDiaVencimientoDraft(c.dia_vencimiento !== null ? String(c.dia_vencimiento) : '')
     setEditingHeader(true)
+  }
+
+  const startEditingTerminos = () => {
+    setValorTotalDraft(c.valor_total ?? '')
+    setTasaInteresDraft(c.tasa_interes ?? '')
+    setPeriodoTasaDraft(c.periodo_tasa ?? 'mensual')
+    setNumeroCuotasDraft(c.numero_cuotas !== null ? String(c.numero_cuotas) : '')
+    updateAmortizacion.reset()
+    setEditingTerminos(true)
+  }
+
+  const handleSubmitTerminos = () => {
+    updateAmortizacion.mutate(
+      {
+        valor_total: valorTotalDraft,
+        tasa_interes: tasaInteresDraft,
+        periodo_tasa: periodoTasaDraft,
+        numero_cuotas: Number(numeroCuotasDraft),
+      },
+      {
+        onSuccess: () => {
+          setConfirmingTerminos(false)
+          setEditingTerminos(false)
+        },
+      },
+    )
   }
 
   const handleFinish = () => updateConcept.mutate({ activo: false })
@@ -150,23 +196,120 @@ export function ConceptDetail() {
                 </div>
               )}
 
-              {c.cuota_fija !== null && (
-                <div className="mt-4 grid grid-cols-3 gap-3 rounded-xl bg-paper px-3 py-2.5 text-center">
-                  <div>
-                    <p className="text-xs text-ink-muted">Cuota fija</p>
-                    <p className="font-tabular text-sm font-semibold text-ink">
-                      {formatCOP(c.cuota_fija)}
-                    </p>
+              {c.cuota_fija !== null && !editingTerminos && (
+                <div className="mt-4 rounded-xl bg-paper px-3 py-2.5">
+                  <div className="grid grid-cols-3 gap-3 text-center">
+                    <div>
+                      <p className="text-xs text-ink-muted">Cuota fija</p>
+                      <p className="font-tabular text-sm font-semibold text-ink">
+                        {formatCOP(c.cuota_fija)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-ink-muted">Tasa</p>
+                      <p className="font-tabular text-sm font-semibold text-ink">
+                        {c.tasa_interes}% {c.periodo_tasa}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-ink-muted">Cuotas</p>
+                      <p className="font-tabular text-sm font-semibold text-ink">{c.numero_cuotas}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-ink-muted">Tasa</p>
-                    <p className="font-tabular text-sm font-semibold text-ink">
-                      {c.tasa_interes}% {c.periodo_tasa}
-                    </p>
+                  <button
+                    type="button"
+                    onClick={startEditingTerminos}
+                    className="mt-2 flex w-full items-center justify-center gap-1.5 text-xs text-ink-muted underline decoration-line underline-offset-4 hover:text-ink"
+                  >
+                    <Pencil className="h-3 w-3" strokeWidth={2} />
+                    Editar términos
+                  </button>
+                </div>
+              )}
+
+              {editingTerminos && (
+                <div className="mt-4 space-y-3 rounded-xl border border-line p-3">
+                  <p className="text-xs text-ink-muted">
+                    Corrige el valor total, la tasa o el número de cuotas — se recalcula la cuota
+                    fija. La cuota inicial no cambia.
+                  </p>
+                  <MoneyInput
+                    placeholder="Valor total de la deuda"
+                    value={valorTotalDraft}
+                    onChange={setValorTotalDraft}
+                    className={inputClass}
+                  />
+                  <div className="flex gap-2">
+                    <div className="relative min-w-0 flex-1">
+                      <input
+                        placeholder="Tasa de interés, ej: 27.7"
+                        inputMode="decimal"
+                        value={tasaInteresDraft}
+                        onChange={(e) => setTasaInteresDraft(sanitizeTasaInteres(e.target.value))}
+                        className={`${inputClass} pr-7`}
+                      />
+                      <span className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-sm text-ink-muted">
+                        %
+                      </span>
+                    </div>
+                    <select
+                      value={periodoTasaDraft}
+                      onChange={(e) => setPeriodoTasaDraft(e.target.value as PeriodoTasa)}
+                      className={`${inputClass} !w-auto shrink-0`}
+                    >
+                      <option value="mensual">mensual</option>
+                      <option value="anual">anual (E.A.)</option>
+                    </select>
                   </div>
-                  <div>
-                    <p className="text-xs text-ink-muted">Cuotas</p>
-                    <p className="font-tabular text-sm font-semibold text-ink">{c.numero_cuotas}</p>
+                  <input
+                    placeholder="Número de cuotas"
+                    inputMode="numeric"
+                    value={numeroCuotasDraft}
+                    onChange={(e) => setNumeroCuotasDraft(e.target.value)}
+                    className={inputClass}
+                  />
+
+                  {confirmingTerminos && (
+                    <p className="rounded-lg bg-warn-soft px-3 py-2 text-xs text-ink">
+                      Esto recalculará tu cuota fija y reemplazará los {mesesPendientes}{' '}
+                      {mesesPendientes === 1 ? 'mes pendiente que aún no has pagado' : 'meses pendientes que aún no has pagado'}
+                      . Los meses ya pagados no se verán afectados.
+                    </p>
+                  )}
+
+                  {updateAmortizacion.isError && (
+                    <p className="text-xs text-danger">{updateAmortizacion.error.message}</p>
+                  )}
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingTerminos(false)
+                        setConfirmingTerminos(false)
+                      }}
+                      className="rounded-full px-3 py-1.5 text-sm text-ink-muted hover:text-ink"
+                    >
+                      Cancelar
+                    </button>
+                    {!confirmingTerminos ? (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingTerminos(true)}
+                        className="rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-paper"
+                      >
+                        Guardar
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSubmitTerminos}
+                        disabled={updateAmortizacion.isPending}
+                        className="rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-paper disabled:opacity-50"
+                      >
+                        {updateAmortizacion.isPending ? 'Guardando…' : 'Confirmar'}
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
