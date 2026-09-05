@@ -18,7 +18,7 @@ export function ChangelogPanel({ open, onClose }: { open: boolean; onClose: () =
   return (
     <>
       <div className="fixed inset-0 z-30" onClick={onClose} />
-      <div className="absolute top-full right-0 z-30 mt-2 max-h-[70svh] w-80 overflow-y-auto rounded-2xl border border-line bg-paper-raised p-3 shadow-xl">
+      <div className="fixed inset-x-4 top-16 z-30 max-h-[70svh] overflow-y-auto rounded-2xl border border-line bg-paper-raised p-3 shadow-xl sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:w-80">
         <p className="mb-2 flex items-center gap-1.5 px-1 text-xs font-medium tracking-wide text-ink-muted uppercase">
           <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
           Novedades
