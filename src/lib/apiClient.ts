@@ -64,3 +64,25 @@ export const apiClient = {
     request<T>(path, { method: 'PUT', body: body !== undefined ? JSON.stringify(body) : undefined }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 }
+
+// Downloads a non-JSON authenticated response as a file - request() above
+// always parses JSON, and a plain <a href> can't carry the Authorization
+// header, so this fetches the blob directly and triggers the browser's
+// download via a temporary object URL.
+export async function downloadAuthenticated(path: string, filename: string): Promise<void> {
+  const headers = new Headers()
+  if (authToken) headers.set('Authorization', `Bearer ${authToken}`)
+
+  const response = await fetch(`${BASE_URL}${path}`, { headers })
+  if (!response.ok) {
+    throw new ApiError(response.status, response.statusText)
+  }
+
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useQueries } from '@tanstack/react-query'
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { AddMenu } from '../components/AddMenu'
+import { CalendarExportPanel } from '../components/CalendarExportPanel'
 import { CalendarGrid, CalendarLegend } from '../components/CalendarGrid'
 import { DayEventList } from '../components/DayEventList'
 import { EventDetailPopover } from '../components/EventDetailPopover'
@@ -43,6 +44,7 @@ export function Agenda() {
   const [newConceptTipo, setNewConceptTipo] = useState<TipoConcepto>('gasto_fijo')
   const [showNewExpense, setShowNewExpense] = useState(false)
   const [showNewTask, setShowNewTask] = useState(false)
+  const [exportPanelOpen, setExportPanelOpen] = useState(false)
 
   const { rows: conceptoRows, isLoading: conceptosLoading } = useDashboardConcepts(anio, mes)
   const gastos = useGastos(anio, mes)
@@ -148,6 +150,20 @@ export function Agenda() {
           >
             <ChevronRight className="h-4 w-4" strokeWidth={2} />
           </button>
+        </div>
+
+        <div className="flex justify-end">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setExportPanelOpen((v) => !v)}
+              className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs text-ink-muted transition hover:bg-accent-soft hover:text-ink"
+            >
+              <CalendarDays className="h-3.5 w-3.5" strokeWidth={2} />
+              Exportar calendario
+            </button>
+            <CalendarExportPanel open={exportPanelOpen} onClose={() => setExportPanelOpen(false)} />
+          </div>
         </div>
 
         {isLoading && <p className="text-center text-sm text-ink-muted">Cargando…</p>}
