@@ -93,11 +93,23 @@ The system SHALL display, in the Concept Detail header for a debt concept that h
 - **THEN** the header does not display any starting-installment information, exactly as before this change
 
 ### Requirement: Amortization terms are never editable
-The system SHALL NOT offer a way to edit `valor_total`, interest rate, installment count, or starting installment for a debt concept that has amortization terms, consistent with the backend rejecting such changes.
+The system SHALL NOT offer a way to edit the starting installment (`cuota_inicial`) for any debt concept — this remains permanently locked. The system SHALL offer a dedicated "Editar términos" control for `valor_total`, interest rate, period, and installment count on a debt concept that already has amortization terms, distinct from the concept's plain name/category edit form, requiring explicit confirmation before submitting since it recalculates the fixed installment and replaces every not-yet-paid monthly entry.
 
 #### Scenario: No edit control for amortization terms
-- **WHEN** the user views or edits a debt concept that has amortization terms
-- **THEN** the edit form only allows changing its name and category assignments, not its financial terms or starting installment
+- **WHEN** the user views or edits a debt concept, amortized or not
+- **THEN** no control anywhere lets them change `cuota_inicial`
+
+#### Scenario: Editing financial terms on an amortized debt
+- **WHEN** the user activates "Editar términos" on a debt concept that has amortization terms
+- **THEN** a form opens pre-filled with the current `valor_total`, interest rate, period, and installment count, without `cuota_inicial`
+
+#### Scenario: Confirmation before recalculating
+- **WHEN** the user submits a change to financial terms on an amortized debt
+- **THEN** the app shows a confirmation explaining that the fixed installment will be recalculated and every not-yet-paid month will be replaced, with already-paid months unaffected, before sending the request
+
+#### Scenario: No term-editing control on non-amortized debts
+- **WHEN** the user views a debt concept with no amortization terms
+- **THEN** "Editar términos" is not shown — the plain edit form and its existing `valor_total` handling are unaffected by this change
 
 ### Requirement: Due day is editable at any time
 The system SHALL let the user set or change any concept's due day from the Concept Detail screen at any time, including on a debt whose amortization terms are locked — unlike those financial terms, the due day is always editable. For an `ingreso` concept, the field SHALL be labeled as the day it's expected to be received, not as a "due" day.
