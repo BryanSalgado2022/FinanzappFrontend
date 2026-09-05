@@ -6,6 +6,7 @@ import type {
   CuotaDeudor,
   CuotaDeudorUpdateInput,
   Deudor,
+  DeudorAmortizacionActivarInput,
   DeudorAmortizacionUpdateInput,
   DeudorCreateInput,
   DeudorUpdateInput,
@@ -109,6 +110,20 @@ export function useMarkCuota(deudorId: number) {
       void queryClient.invalidateQueries({ queryKey: cuotasKey(deudorId) })
       void queryClient.invalidateQueries({ queryKey: deudorKey(deudorId) })
       void queryClient.invalidateQueries({ queryKey: deudoresKey })
+      void queryClient.invalidateQueries({ queryKey: ['summary'] })
+    },
+  })
+}
+
+export function useActivarAmortizacionDeudor(id: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: DeudorAmortizacionActivarInput) =>
+      apiClient.post<Deudor>(`/deudores/${id}/amortizacion`, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: deudoresKey })
+      void queryClient.invalidateQueries({ queryKey: deudorKey(id) })
+      void queryClient.invalidateQueries({ queryKey: cuotasKey(id) })
       void queryClient.invalidateQueries({ queryKey: ['summary'] })
     },
   })

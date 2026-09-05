@@ -5,6 +5,7 @@ import { MoneyInput } from '../components/MoneyInput'
 import { ProgressRing } from '../components/ProgressRing'
 import {
   useAbonos,
+  useActivarAmortizacionDeudor,
   useCreateAbono,
   useCuotasDeudor,
   useDeleteAbono,
@@ -111,6 +112,7 @@ export function DeudorDetail() {
   const [tasaInteresDraft, setTasaInteresDraft] = useState('')
   const [periodoTasaDraft, setPeriodoTasaDraft] = useState<PeriodoTasa>('mensual')
   const [numeroCuotasDraft, setNumeroCuotasDraft] = useState('')
+  const [cuotaInicialDraft, setCuotaInicialDraft] = useState('')
 
   const deudor = useDeudor(deudorId)
   const abonos = useAbonos(deudorId)
@@ -119,6 +121,7 @@ export function DeudorDetail() {
   const deleteDeudor = useDeleteDeudor(deudorId)
   const createAbono = useCreateAbono(deudorId)
   const updateAmortizacion = useUpdateAmortizacionDeudor(deudorId)
+  const activarAmortizacion = useActivarAmortizacionDeudor(deudorId)
 
   if (deudor.isLoading || !deudor.data) {
     return <p className="p-5 text-sm text-ink-muted">Cargando…</p>
@@ -145,11 +148,31 @@ export function DeudorDetail() {
     setTasaInteresDraft(d.tasa_interes ?? '')
     setPeriodoTasaDraft(d.periodo_tasa ?? 'mensual')
     setNumeroCuotasDraft(d.numero_cuotas !== null ? String(d.numero_cuotas) : '')
+    setCuotaInicialDraft('')
     updateAmortizacion.reset()
+    activarAmortizacion.reset()
     setEditingTerminos(true)
   }
 
   const handleSubmitTerminos = () => {
+    if (d.cuota_fija === null) {
+      activarAmortizacion.mutate(
+        {
+          monto_total: terminosMontoTotal,
+          tasa_interes: tasaInteresDraft,
+          periodo_tasa: periodoTasaDraft,
+          numero_cuotas: Number(numeroCuotasDraft),
+          cuota_inicial: cuotaInicialDraft !== '' ? Number(cuotaInicialDraft) : undefined,
+        },
+        {
+          onSuccess: () => {
+            setConfirmingTerminos(false)
+            setEditingTerminos(false)
+          },
+        },
+      )
+      return
+    }
     updateAmortizacion.mutate(
       {
         monto_total: terminosMontoTotal,
@@ -236,6 +259,17 @@ export function DeudorDetail() {
                 )}
               </div>
 
+              {d.cuota_fija === null && !editingTerminos && (
+                <button
+                  type="button"
+                  onClick={startEditingTerminos}
+                  className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-paper px-3 py-2.5 text-xs text-ink-muted underline decoration-line underline-offset-4 hover:text-ink"
+                >
+                  <Pencil className="h-3 w-3" strokeWidth={2} />
+                  Agregar términos de amortización
+                </button>
+              )}
+
               {d.cuota_fija !== null && !editingTerminos && (
                 <div className="mt-4 rounded-xl bg-paper px-3 py-2.5">
                   <div className="grid grid-cols-3 gap-3 text-center">
@@ -270,8 +304,9 @@ export function DeudorDetail() {
               {editingTerminos && (
                 <div className="mt-4 space-y-3 rounded-xl border border-line p-3">
                   <p className="text-xs text-ink-muted">
-                    Corrige el monto total, la tasa o el número de cuotas — se recalcula la
-                    cuota fija. La cuota inicial no cambia.
+                    {d.cuota_fija === null
+                      ? 'Ingresa el monto total, la tasa y el número de cuotas — se calcula la cuota fija y se genera el cronograma.'
+                      : 'Corrige el monto total, la tasa o el número de cuotas — se recalcula la cuota fija. La cuota inicial no cambia.'}
                   </p>
                   <MoneyInput
                     placeholder="Monto total"
@@ -309,18 +344,34 @@ export function DeudorDetail() {
                     className={inputClass}
                   />
 
+                  {d.cuota_fija === null && (
+                    <div>
+                      <input
+                        placeholder="¿Ya vas cobrando? ¿En qué cuota vas? (opcional)"
+                        inputMode="numeric"
+                        value={cuotaInicialDraft}
+                        onChange={(e) => setCuotaInicialDraft(e.target.value)}
+                        className={inputClass}
+                      />
+                      <p className="mt-1 px-1 text-xs text-ink-muted">
+                        Si ya llevas cuotas cobradas fuera de la app, indica en cuál vas. Vacío =
+                        empieza en la cuota 1.
+                      </p>
+                    </div>
+                  )}
+
                   {confirmingTerminos && (
                     <p className="rounded-lg bg-warn-soft px-3 py-2 text-xs text-ink">
-                      Esto recalculará tu cuota fija y reemplazará los {mesesPendientes}{' '}
-                      {mesesPendientes === 1
-                        ? 'mes pendiente que aún no has cobrado'
-                        : 'meses pendientes que aún no has cobrado'}
-                      . Los meses ya cobrados no se verán afectados.
+                      {d.cuota_fija === null
+                        ? `Esto generará el cronograma y reemplazará los ${mesesPendientes} ${mesesPendientes === 1 ? 'mes existente' : 'meses existentes'} que aún no has cobrado. Los abonos ya registrados quedan como historial.`
+                        : `Esto recalculará tu cuota fija y reemplazará los ${mesesPendientes} ${mesesPendientes === 1 ? 'mes pendiente que aún no has cobrado' : 'meses pendientes que aún no has cobrado'}. Los meses ya cobrados no se verán afectados.`}
                     </p>
                   )}
 
-                  {updateAmortizacion.isError && (
-                    <p className="text-xs text-danger">{updateAmortizacion.error.message}</p>
+                  {(d.cuota_fija === null ? activarAmortizacion : updateAmortizacion).isError && (
+                    <p className="text-xs text-danger">
+                      {(d.cuota_fija === null ? activarAmortizacion : updateAmortizacion).error?.message}
+                    </p>
                   )}
 
                   <div className="flex justify-end gap-2">
@@ -346,10 +397,12 @@ export function DeudorDetail() {
                       <button
                         type="button"
                         onClick={handleSubmitTerminos}
-                        disabled={updateAmortizacion.isPending}
+                        disabled={(d.cuota_fija === null ? activarAmortizacion : updateAmortizacion).isPending}
                         className="rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-paper disabled:opacity-50"
                       >
-                        {updateAmortizacion.isPending ? 'Guardando…' : 'Confirmar'}
+                        {(d.cuota_fija === null ? activarAmortizacion : updateAmortizacion).isPending
+                          ? 'Guardando…'
+                          : 'Confirmar'}
                       </button>
                     )}
                   </div>

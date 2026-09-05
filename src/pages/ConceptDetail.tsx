@@ -5,7 +5,13 @@ import { CategoryPicker } from '../components/CategoryPicker'
 import { MoneyInput } from '../components/MoneyInput'
 import { MonthEntryLegend, MonthEntryRow } from '../components/MonthEntryRow'
 import { ProgressRing } from '../components/ProgressRing'
-import { useConcept, useDeleteConcept, useUpdateAmortizacion, useUpdateConcept } from '../hooks/useConcepts'
+import {
+  useActivarAmortizacion,
+  useConcept,
+  useDeleteConcept,
+  useUpdateAmortizacion,
+  useUpdateConcept,
+} from '../hooks/useConcepts'
 import { useConceptEntries, useDeleteEntry, useUpsertEntry } from '../hooks/useEntries'
 import { diaVencimientoLabel, formatCOP, quarterLabel, tipoDotClass, tipoLabel } from '../lib/format'
 import type { PeriodoTasa } from '../types'
@@ -53,6 +59,7 @@ export function ConceptDetail() {
   const [tasaInteresDraft, setTasaInteresDraft] = useState('')
   const [periodoTasaDraft, setPeriodoTasaDraft] = useState<PeriodoTasa>('mensual')
   const [numeroCuotasDraft, setNumeroCuotasDraft] = useState('')
+  const [cuotaInicialDraft, setCuotaInicialDraft] = useState('')
 
   const concept = useConcept(conceptoId)
   const entries = useConceptEntries(conceptoId)
@@ -61,6 +68,7 @@ export function ConceptDetail() {
   const updateConcept = useUpdateConcept(conceptoId)
   const deleteConcept = useDeleteConcept(conceptoId)
   const updateAmortizacion = useUpdateAmortizacion(conceptoId)
+  const activarAmortizacion = useActivarAmortizacion(conceptoId)
 
   if (concept.isLoading || !concept.data) {
     return <p className="p-5 text-sm text-ink-muted">Cargando…</p>
@@ -118,11 +126,31 @@ export function ConceptDetail() {
     setTasaInteresDraft(c.tasa_interes ?? '')
     setPeriodoTasaDraft(c.periodo_tasa ?? 'mensual')
     setNumeroCuotasDraft(c.numero_cuotas !== null ? String(c.numero_cuotas) : '')
+    setCuotaInicialDraft('')
     updateAmortizacion.reset()
+    activarAmortizacion.reset()
     setEditingTerminos(true)
   }
 
   const handleSubmitTerminos = () => {
+    if (c.cuota_fija === null) {
+      activarAmortizacion.mutate(
+        {
+          valor_total: valorTotalDraft,
+          tasa_interes: tasaInteresDraft,
+          periodo_tasa: periodoTasaDraft,
+          numero_cuotas: Number(numeroCuotasDraft),
+          cuota_inicial: cuotaInicialDraft !== '' ? Number(cuotaInicialDraft) : undefined,
+        },
+        {
+          onSuccess: () => {
+            setConfirmingTerminos(false)
+            setEditingTerminos(false)
+          },
+        },
+      )
+      return
+    }
     updateAmortizacion.mutate(
       {
         valor_total: valorTotalDraft,
@@ -196,6 +224,17 @@ export function ConceptDetail() {
                 </div>
               )}
 
+              {c.tipo === 'deuda' && c.cuota_fija === null && !editingTerminos && (
+                <button
+                  type="button"
+                  onClick={startEditingTerminos}
+                  className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-paper px-3 py-2.5 text-xs text-ink-muted underline decoration-line underline-offset-4 hover:text-ink"
+                >
+                  <Pencil className="h-3 w-3" strokeWidth={2} />
+                  Agregar términos de amortización
+                </button>
+              )}
+
               {c.cuota_fija !== null && !editingTerminos && (
                 <div className="mt-4 rounded-xl bg-paper px-3 py-2.5">
                   <div className="grid grid-cols-3 gap-3 text-center">
@@ -230,8 +269,9 @@ export function ConceptDetail() {
               {editingTerminos && (
                 <div className="mt-4 space-y-3 rounded-xl border border-line p-3">
                   <p className="text-xs text-ink-muted">
-                    Corrige el valor total, la tasa o el número de cuotas — se recalcula la cuota
-                    fija. La cuota inicial no cambia.
+                    {c.cuota_fija === null
+                      ? 'Ingresa el valor total, la tasa y el número de cuotas — se calcula la cuota fija y se genera el cronograma.'
+                      : 'Corrige el valor total, la tasa o el número de cuotas — se recalcula la cuota fija. La cuota inicial no cambia.'}
                   </p>
                   <MoneyInput
                     placeholder="Valor total de la deuda"
@@ -269,16 +309,34 @@ export function ConceptDetail() {
                     className={inputClass}
                   />
 
+                  {c.cuota_fija === null && (
+                    <div>
+                      <input
+                        placeholder="¿Ya vas pagando? ¿En qué cuota vas? (opcional)"
+                        inputMode="numeric"
+                        value={cuotaInicialDraft}
+                        onChange={(e) => setCuotaInicialDraft(e.target.value)}
+                        className={inputClass}
+                      />
+                      <p className="mt-1 px-1 text-xs text-ink-muted">
+                        Si ya llevas cuotas pagadas fuera de la app, indica en cuál vas. Vacío =
+                        empieza en la cuota 1.
+                      </p>
+                    </div>
+                  )}
+
                   {confirmingTerminos && (
                     <p className="rounded-lg bg-warn-soft px-3 py-2 text-xs text-ink">
-                      Esto recalculará tu cuota fija y reemplazará los {mesesPendientes}{' '}
-                      {mesesPendientes === 1 ? 'mes pendiente que aún no has pagado' : 'meses pendientes que aún no has pagado'}
-                      . Los meses ya pagados no se verán afectados.
+                      {c.cuota_fija === null
+                        ? `Esto generará el cronograma y reemplazará los ${mesesPendientes} ${mesesPendientes === 1 ? 'mes existente' : 'meses existentes'} que aún no has pagado. Los meses ya pagados quedan como historial.`
+                        : `Esto recalculará tu cuota fija y reemplazará los ${mesesPendientes} ${mesesPendientes === 1 ? 'mes pendiente que aún no has pagado' : 'meses pendientes que aún no has pagado'}. Los meses ya pagados no se verán afectados.`}
                     </p>
                   )}
 
-                  {updateAmortizacion.isError && (
-                    <p className="text-xs text-danger">{updateAmortizacion.error.message}</p>
+                  {(c.cuota_fija === null ? activarAmortizacion : updateAmortizacion).isError && (
+                    <p className="text-xs text-danger">
+                      {(c.cuota_fija === null ? activarAmortizacion : updateAmortizacion).error?.message}
+                    </p>
                   )}
 
                   <div className="flex justify-end gap-2">
@@ -304,10 +362,12 @@ export function ConceptDetail() {
                       <button
                         type="button"
                         onClick={handleSubmitTerminos}
-                        disabled={updateAmortizacion.isPending}
+                        disabled={(c.cuota_fija === null ? activarAmortizacion : updateAmortizacion).isPending}
                         className="rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-paper disabled:opacity-50"
                       >
-                        {updateAmortizacion.isPending ? 'Guardando…' : 'Confirmar'}
+                        {(c.cuota_fija === null ? activarAmortizacion : updateAmortizacion).isPending
+                          ? 'Guardando…'
+                          : 'Confirmar'}
                       </button>
                     )}
                   </div>

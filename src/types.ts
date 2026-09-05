@@ -76,6 +76,17 @@ export interface ConceptoAmortizacionUpdateInput {
   numero_cuotas: number
 }
 
+// POST /concepts/{id}/amortizacion - sets terms for the first time on a
+// debt that doesn't have them yet. Unlike ConceptoAmortizacionUpdateInput,
+// cuota_inicial IS accepted here (mirrors ConceptoCreateInput).
+export interface ConceptoAmortizacionActivarInput {
+  valor_total: string
+  tasa_interes: string
+  periodo_tasa: PeriodoTasa
+  numero_cuotas: number
+  cuota_inicial?: number
+}
+
 export interface EntradaMensual {
   id: number
   concepto_id: number
@@ -194,6 +205,17 @@ export interface DeudorAmortizacionUpdateInput {
   tasa_interes: string
   periodo_tasa: PeriodoTasa
   numero_cuotas: number
+}
+
+// POST /deudores/{id}/amortizacion - sets terms for the first time on a
+// debtor that doesn't have them yet. Unlike DeudorAmortizacionUpdateInput,
+// cuota_inicial IS accepted here (mirrors DeudorCreateInput).
+export interface DeudorAmortizacionActivarInput {
+  monto_total: string
+  tasa_interes: string
+  periodo_tasa: PeriodoTasa
+  numero_cuotas: number
+  cuota_inicial?: number
 }
 
 export interface CuotaDeudor {
