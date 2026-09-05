@@ -23,15 +23,3 @@ export function useUpdateAccentColor() {
     },
   })
 }
-
-// Separate from useUpdateAccentColor for clarity at call sites that edit
-// ahorros specifically, though both currently do the same PATCH + invalidate.
-export function useUpdateUserPreferences() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (input: UserUpdateInput) => apiClient.patch<UserRead>('/users/me', input),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: meKey })
-    },
-  })
-}

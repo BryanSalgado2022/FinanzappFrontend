@@ -261,12 +261,29 @@ export interface UserRead {
   email: string
   name: string
   color_acento: string | null
-  ahorros: string | null
+  // Computed running balance from the savings ledger - never manually set,
+  // always present.
+  ahorros: string
 }
 
 export interface UserUpdateInput {
   color_acento?: string | null
-  ahorros?: string | null
+}
+
+export type TipoAporte = 'aporte' | 'retiro'
+
+export interface AporteAhorro {
+  id: number
+  monto: string
+  fecha: string
+  tipo: TipoAporte
+  created_at: string
+}
+
+export interface AporteAhorroCreateInput {
+  monto: string
+  fecha: string
+  tipo: TipoAporte
 }
 
 // The backend has no "get current user" endpoint and its JWT payload only

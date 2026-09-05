@@ -1,31 +1,19 @@
 import { useState } from 'react'
-import { PiggyBank } from 'lucide-react'
-import { MoneyInput } from './MoneyInput'
-import { useCurrentUser, useUpdateUserPreferences } from '../hooks/useAccentColor'
+import { PiggyBank, Plus } from 'lucide-react'
+import { AhorroHistoryModal } from './AhorroHistoryModal'
+import { NewAporteAhorroForm } from './NewAporteAhorroForm'
+import { useCurrentUser } from '../hooks/useAccentColor'
 import { formatCOP } from '../lib/format'
-
-const inputClass =
-  'w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
 
 export function SavingsCard() {
   const user = useCurrentUser()
-  const updatePrefs = useUpdateUserPreferences()
-
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState('')
+  const [creating, setCreating] = useState(false)
+  const [viewingHistory, setViewingHistory] = useState(false)
 
   if (!user.data) return null
 
   const ahorros = user.data.ahorros
-
-  const startEditing = () => {
-    setDraft(ahorros ?? '')
-    setEditing(true)
-  }
-
-  const save = () => {
-    updatePrefs.mutate({ ahorros: draft || null }, { onSuccess: () => setEditing(false) })
-  }
+  const isZero = Number(ahorros) === 0
 
   return (
     <div className="w-full rounded-3xl border border-line bg-paper-raised p-6 shadow-sm">
@@ -34,38 +22,35 @@ export function SavingsCard() {
         <p className="text-xs font-medium tracking-wide text-ink-muted uppercase">Ahorros</p>
       </div>
 
-      {editing ? (
-        <div className="mt-2 space-y-2">
-          <MoneyInput value={draft} onChange={setDraft} placeholder="Ahorros" className={inputClass} />
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={save}
-              disabled={updatePrefs.isPending}
-              className="rounded-full bg-ink px-3.5 py-1.5 text-xs font-medium text-paper disabled:opacity-50"
-            >
-              Guardar
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditing(false)}
-              className="rounded-full px-3.5 py-1.5 text-xs text-ink-muted hover:text-ink"
-            >
-              Cancelar
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button type="button" onClick={startEditing} className="mt-2 block w-full text-left">
-          {ahorros !== null ? (
-            <p className="font-tabular font-display text-3xl font-semibold text-accent">
-              {formatCOP(ahorros)}
-            </p>
-          ) : (
-            <p className="text-sm text-ink-muted">Toca para agregar cuánto tienes ahorrado</p>
-          )}
-        </button>
+      <p className="mt-2 font-tabular font-display text-3xl font-semibold text-accent">
+        {formatCOP(ahorros)}
+      </p>
+      {isZero && (
+        <p className="mt-1 text-xs text-ink-muted">
+          Aún no tienes ahorros registrados — agrega tu primer aporte.
+        </p>
       )}
+
+      <div className="mt-3 flex gap-4 text-xs">
+        <button
+          type="button"
+          onClick={() => setCreating(true)}
+          className="flex items-center gap-1 font-medium text-ink-muted hover:text-ink"
+        >
+          <Plus className="h-3.5 w-3.5" strokeWidth={2} />
+          Agregar
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewingHistory(true)}
+          className="text-ink-muted underline decoration-line underline-offset-4 hover:text-ink"
+        >
+          Ver historial
+        </button>
+      </div>
+
+      {creating && <NewAporteAhorroForm onDone={() => setCreating(false)} />}
+      {viewingHistory && <AhorroHistoryModal onDone={() => setViewingHistory(false)} />}
     </div>
   )
 }
