@@ -12,4 +12,4 @@
 ## 3. Verification
 
 - [x] 3.1 Run `npx tsc -b` to confirm no type errors.
-- [ ] 3.2 Manually verify in-browser: indicator shows on first load (unseen entries exist); opening the panel shows all entries newest-first and clears the indicator; reloading keeps it cleared; closing via outside-click/Escape works; dark and light theme both look right. (Pending: browser extension disconnected — verify once reconnected, alongside the other features from this session.)
+- [x] 3.2 Manually verify in-browser: indicator shows on first load (unseen entries exist); opening the panel shows all entries newest-first and clears the indicator; reloading keeps it cleared; closing via outside-click/Escape works; dark and light theme both look right.

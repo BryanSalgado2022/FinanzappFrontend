@@ -20,4 +20,4 @@
 ## 4. Verification
 
 - [x] 4.1 Run `npx tsc -b` to confirm no type errors.
-- [ ] 4.2 Manually verify in-browser (backend already deployed/running locally): creating an amortized debtor generates its schedule; the amortization summary and "Editar términos" flow work like on Concept Detail; marking a cuota paid/unpaid updates the list and remaining balance without a reload; correcting terms with an invalid `numero_cuotas` shows the server's error; a non-amortized debtor's creation form and detail screen are unaffected. (Pending: browser extension disconnected — verify once reconnected.)
+- [x] 4.2 Manually verify in-browser (backend already deployed/running locally): creating an amortized debtor generates its schedule; the amortization summary and "Editar términos" flow work like on Concept Detail; marking a cuota paid/unpaid updates the list and remaining balance without a reload; correcting terms with an invalid `numero_cuotas` shows the server's error; a non-amortized debtor's creation form and detail screen are unaffected.

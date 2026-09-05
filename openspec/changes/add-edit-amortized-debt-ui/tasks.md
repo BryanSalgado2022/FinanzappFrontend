@@ -12,4 +12,4 @@
 ## 3. Verification
 
 - [x] 3.1 Run `npx tsc -b` to confirm no type errors.
-- [ ] 3.2 Manually verify in-browser (backend change deployed/running locally): "Editar términos" only appears on amortized debts; form pre-fills current values; confirmation shows the correct unpaid-month count; submitting recalculates and the entry list reflects the new schedule while paid months stay untouched; submitting an invalid `numero_cuotas` shows the backend's error. (Pending: browser extension disconnected — verify once reconnected.)
+- [x] 3.2 Manually verify in-browser (backend change deployed/running locally): "Editar términos" only appears on amortized debts; form pre-fills current values; confirmation shows the correct unpaid-month count; submitting recalculates and the entry list reflects the new schedule while paid months stay untouched; submitting an invalid `numero_cuotas` shows the backend's error.

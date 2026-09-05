@@ -12,4 +12,4 @@
 ## 3. Verification
 
 - [x] 3.1 Run `npx tsc -b` to confirm no type errors.
-- [ ] 3.2 Manually verify in-browser: "Descargar" produces a real `.ics` file download; generating a subscribe URL for the first time works; reloading the page and reopening the panel shows the same URL (does not silently regenerate); "Regenerar" produces a different URL and the old one stops working (confirm via a direct request); copy-to-clipboard works. (Pending: browser extension disconnected — verify once reconnected, alongside the other pending items from this session.)
+- [x] 3.2 Manually verify in-browser: "Descargar" produces a real `.ics` file download; generating a subscribe URL for the first time works; reloading the page and reopening the panel shows the same URL (does not silently regenerate); "Regenerar" produces a different URL and the old one stops working (confirm via a direct request); copy-to-clipboard works.

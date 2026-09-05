@@ -20,4 +20,4 @@
 ## 5. Verification
 
 - [x] 5.1 Run `npx tsc -b` to confirm no type errors.
-- [ ] 5.2 Manually verify in-browser (backend already deployed/running locally): recording a contribution/withdrawal updates the card balance immediately; the history view lists entries correctly and deleting one updates the balance; the zero-balance empty state reads correctly; no client-side code links a retiro to any other balance/summary figure. (Pending: browser extension disconnected — verify once reconnected.)
+- [x] 5.2 Manually verify in-browser (backend already deployed/running locally): recording a contribution/withdrawal updates the card balance immediately; the history view lists entries correctly and deleting one updates the balance; the zero-balance empty state reads correctly; no client-side code links a retiro to any other balance/summary figure.
