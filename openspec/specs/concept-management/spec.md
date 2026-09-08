@@ -93,11 +93,11 @@ The system SHALL display, in the Concept Detail header for a debt concept that h
 - **THEN** the header does not display any starting-installment information, exactly as before this change
 
 ### Requirement: Amortization terms are never editable
-The system SHALL NOT offer a way to edit the starting installment (`cuota_inicial`) for any debt concept — this remains permanently locked. The system SHALL offer a dedicated "Editar términos" control for `valor_total`, interest rate, period, and installment count on a debt concept that already has amortization terms, distinct from the concept's plain name/category edit form, requiring explicit confirmation before submitting since it recalculates the fixed installment and replaces every not-yet-paid monthly entry.
+The system SHALL NOT offer a way to edit the starting installment (`cuota_inicial`) for any debt concept — this remains permanently locked once set. The system SHALL offer a dedicated "Editar términos" control for `valor_total`, interest rate, period, and installment count on a debt concept that already has amortization terms, distinct from the concept's plain name/category edit form, requiring explicit confirmation before submitting since it recalculates the fixed installment and replaces every not-yet-paid monthly entry. On a debt concept with no amortization terms yet, the system SHALL offer a separate "Agregar términos de amortización" control that sets them for the first time, including an optional starting installment number, also requiring explicit confirmation.
 
 #### Scenario: No edit control for amortization terms
 - **WHEN** the user views or edits a debt concept, amortized or not
-- **THEN** no control anywhere lets them change `cuota_inicial`
+- **THEN** no control anywhere lets them change an already-set `cuota_inicial`
 
 #### Scenario: Editing financial terms on an amortized debt
 - **WHEN** the user activates "Editar términos" on a debt concept that has amortization terms
@@ -109,7 +109,11 @@ The system SHALL NOT offer a way to edit the starting installment (`cuota_inicia
 
 #### Scenario: No term-editing control on non-amortized debts
 - **WHEN** the user views a debt concept with no amortization terms
-- **THEN** "Editar términos" is not shown — the plain edit form and its existing `valor_total` handling are unaffected by this change
+- **THEN** "Editar términos" is not shown; instead "Agregar términos de amortización" is shown, and the plain edit form and its existing `valor_total` handling are unaffected
+
+#### Scenario: Setting amortization terms for the first time
+- **WHEN** the user activates "Agregar términos de amortización" on a debt concept with no amortization terms, and submits `valor_total`, interest rate, period, and installment count
+- **THEN** the app shows a confirmation explaining that a schedule will be generated and any existing not-yet-paid monthly entries will be replaced, with already-paid ones kept as history, before sending the request
 
 ### Requirement: Due day is editable at any time
 The system SHALL let the user set or change any concept's due day from the Concept Detail screen at any time, including on a debt whose amortization terms are locked — unlike those financial terms, the due day is always editable. For an `ingreso` concept, the field SHALL be labeled as the day it's expected to be received, not as a "due" day.
