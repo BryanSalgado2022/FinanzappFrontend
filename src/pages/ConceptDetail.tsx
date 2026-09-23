@@ -531,6 +531,7 @@ export function ConceptDetail() {
                       isCurrentMonth={anio === now.getFullYear() && mes === now.getMonth() + 1}
                       entry={entriesByMonth.get(mes)}
                       tipo={c.tipo}
+                      esAmortizada={c.tipo === 'deuda' && c.cuota_fija !== null}
                       isEditing={editingMes === mes}
                       onStartEdit={() => {
                         deleteEntry.reset()

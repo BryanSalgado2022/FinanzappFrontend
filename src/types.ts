@@ -103,6 +103,10 @@ export interface EntradaMensualInput {
   monto_planeado: string
   monto_pagado?: string
   pagado?: boolean
+  // When set alongside a monto_pagado greater than monto_planeado, the
+  // surplus is routed into a principal prepayment instead of being stored
+  // against this entry - only meaningful for an amortized debt entry.
+  abono_capital_modo?: ModoAbonoCapital
 }
 
 export interface MonthlySummary {
@@ -233,6 +237,10 @@ export interface CuotaDeudor {
 export interface CuotaDeudorUpdateInput {
   monto_pagado?: string
   pagado: boolean
+  // When set alongside a monto_pagado greater than monto_planeado, the
+  // surplus is routed into a principal prepayment instead of being stored
+  // against this cuota.
+  abono_capital_modo?: ModoAbonoCapital
 }
 
 export interface DeudorUpdateInput {

@@ -2,17 +2,26 @@ import { useState, type ReactNode } from 'react'
 import { AlertTriangle, Check, Circle, Trash2 } from 'lucide-react'
 import { MoneyInput } from './MoneyInput'
 import { formatCOP, monthName } from '../lib/format'
-import type { EntradaMensual, TipoConcepto } from '../types'
+import type { EntradaMensual, ModoAbonoCapital, TipoConcepto } from '../types'
 
 interface MonthEntryRowProps {
   mes: number
   isCurrentMonth: boolean
   entry: EntradaMensual | undefined
   tipo: TipoConcepto
+  // Only an amortized debt's entries can have a surplus routed into a
+  // principal prepayment - gasto_fijo/ingreso and non-amortized debts never
+  // show the modo toggle, see design.md (add-abono-sobrante-ui).
+  esAmortizada: boolean
   isEditing: boolean
   onStartEdit: () => void
   onStopEdit: () => void
-  onSave: (input: { monto_planeado: string; monto_pagado?: string; pagado?: boolean }) => void
+  onSave: (input: {
+    monto_planeado: string
+    monto_pagado?: string
+    pagado?: boolean
+    abono_capital_modo?: ModoAbonoCapital
+  }) => void
   saving: boolean
   puedeEliminarse: boolean
   deleting: boolean
@@ -141,7 +150,7 @@ export function MonthEntryLegend() {
 
 /** A pill toggle (not a native checkbox) so marking something paid/received
  * feels like a deliberate, satisfying action rather than a form checkbox. */
-function PagadoToggle({
+export function PagadoToggle({
   checked,
   onChange,
   labelOn,
@@ -177,6 +186,7 @@ export function MonthEntryRow({
   isCurrentMonth,
   entry,
   tipo,
+  esAmortizada,
   isEditing,
   onStartEdit,
   onStopEdit,
@@ -191,19 +201,25 @@ export function MonthEntryRow({
   const [montoPlaneado, setMontoPlaneado] = useState(entry?.monto_planeado ?? '')
   const [montoPagado, setMontoPagado] = useState(entry?.monto_pagado ?? '')
   const [pagado, setPagado] = useState(entry?.pagado ?? false)
+  const [modo, setModo] = useState<ModoAbonoCapital>('reducir_cuota')
 
   const startEditing = () => {
     setMontoPlaneado(entry?.monto_planeado ?? '')
     setMontoPagado(entry?.monto_pagado ?? '')
     setPagado(entry?.pagado ?? false)
+    setModo('reducir_cuota')
     onStartEdit()
   }
+
+  const planeadoDeReferencia = entry?.monto_planeado ?? montoPlaneado
+  const hasSobrante = esAmortizada && Number(montoPagado || 0) > Number(planeadoDeReferencia || 0)
 
   const handleSave = () => {
     onSave({
       monto_planeado: montoPlaneado,
       monto_pagado: montoPagado || undefined,
       pagado,
+      abono_capital_modo: hasSobrante ? modo : undefined,
     })
     onStopEdit()
   }
@@ -251,6 +267,28 @@ export function MonthEntryRow({
               labelOn={labels.estado}
               labelOff={labels.pendiente}
             />
+            {hasSobrante && (
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setModo('reducir_plazo')}
+                  className={`flex-1 rounded-xl border px-3 py-2 text-sm ${
+                    modo === 'reducir_plazo' ? 'border-accent bg-accent-soft text-ink' : 'border-line text-ink-muted'
+                  }`}
+                >
+                  Reducir plazo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModo('reducir_cuota')}
+                  className={`flex-1 rounded-xl border px-3 py-2 text-sm ${
+                    modo === 'reducir_cuota' ? 'border-accent bg-accent-soft text-ink' : 'border-line text-ink-muted'
+                  }`}
+                >
+                  Reducir cuota
+                </button>
+              </div>
+            )}
             {deleteError && <p className="text-xs text-danger">{deleteError}</p>}
 
             <div className="flex items-center justify-between gap-2 pt-1">

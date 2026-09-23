@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { CheckCircle2, Pencil, Trash2 } from 'lucide-react'
 import { MoneyInput } from '../components/MoneyInput'
 import { ProgressRing } from '../components/ProgressRing'
+import { PagadoToggle } from '../components/MonthEntryRow'
 import {
   useAbonos,
   useActivarAmortizacionDeudor,
@@ -34,37 +35,109 @@ function sanitizeTasaInteres(raw: string): string {
 
 function CuotaRow({ deudorId, cuota }: { deudorId: number; cuota: CuotaDeudor }) {
   const markCuota = useMarkCuota(deudorId)
+  const [isEditing, setIsEditing] = useState(false)
+  const [montoPagado, setMontoPagado] = useState('')
+  const [pagado, setPagado] = useState(false)
+  const [modo, setModo] = useState<ModoAbonoCapital>('reducir_cuota')
+
+  const startEditing = () => {
+    setMontoPagado(cuota.monto_pagado ?? cuota.monto_planeado)
+    setPagado(cuota.pagado)
+    setModo('reducir_cuota')
+    markCuota.reset()
+    setIsEditing(true)
+  }
+
+  const hasSobrante = Number(montoPagado || 0) > Number(cuota.monto_planeado)
+
+  const handleSave = () => {
+    markCuota.mutate(
+      {
+        anio: cuota.anio,
+        mes: cuota.mes,
+        monto_pagado: montoPagado || undefined,
+        pagado,
+        abono_capital_modo: hasSobrante ? modo : undefined,
+      },
+      { onSuccess: () => setIsEditing(false) },
+    )
+  }
+
+  if (!isEditing) {
+    return (
+      <li>
+        <button
+          type="button"
+          onClick={startEditing}
+          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm transition hover:bg-paper"
+        >
+          <span className="text-ink-muted">
+            {monthName(cuota.mes)} {cuota.anio}
+            {cuota.pagado && cuota.fecha_pago && (
+              <span className="ml-1.5 text-xs">· pagado el {formatFecha(cuota.fecha_pago)}</span>
+            )}
+          </span>
+          <span className="font-tabular text-ink">{formatCOP(cuota.monto_pagado ?? cuota.monto_planeado)}</span>
+        </button>
+      </li>
+    )
+  }
 
   return (
-    <li className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
-      <span className="text-ink-muted">
+    <li className="space-y-2 px-4 py-3">
+      <p className="text-xs font-medium text-ink-muted">
         {monthName(cuota.mes)} {cuota.anio}
-        {cuota.pagado && cuota.fecha_pago && (
-          <span className="ml-1.5 text-xs">· pagado el {formatFecha(cuota.fecha_pago)}</span>
-        )}
-      </span>
-      <span className="flex items-center gap-3">
-        <span className="font-tabular text-ink">{formatCOP(cuota.monto_pagado ?? cuota.monto_planeado)}</span>
-        {cuota.pagado ? (
+      </p>
+      <MoneyInput
+        placeholder="Monto pagado"
+        value={montoPagado}
+        onChange={setMontoPagado}
+        className={inputClass}
+      />
+      <PagadoToggle checked={pagado} onChange={setPagado} labelOn="Pagado" labelOff="Marcar como pagado" />
+
+      {hasSobrante && (
+        <div className="flex gap-2 pt-1">
           <button
             type="button"
-            onClick={() => markCuota.mutate({ anio: cuota.anio, mes: cuota.mes, pagado: false })}
-            disabled={markCuota.isPending}
-            className="text-xs text-ink-muted underline decoration-line underline-offset-4 hover:text-ink disabled:opacity-50"
+            onClick={() => setModo('reducir_plazo')}
+            className={`flex-1 rounded-xl border px-3 py-2 text-sm ${
+              modo === 'reducir_plazo' ? 'border-accent bg-accent-soft text-ink' : 'border-line text-ink-muted'
+            }`}
           >
-            Marcar no pagado
+            Reducir plazo
           </button>
-        ) : (
           <button
             type="button"
-            onClick={() => markCuota.mutate({ anio: cuota.anio, mes: cuota.mes, pagado: true })}
-            disabled={markCuota.isPending}
-            className="rounded-full bg-ink px-3 py-1 text-xs font-medium text-paper disabled:opacity-50"
+            onClick={() => setModo('reducir_cuota')}
+            className={`flex-1 rounded-xl border px-3 py-2 text-sm ${
+              modo === 'reducir_cuota' ? 'border-accent bg-accent-soft text-ink' : 'border-line text-ink-muted'
+            }`}
           >
-            Marcar pagado
+            Reducir cuota
           </button>
-        )}
-      </span>
+        </div>
+      )}
+
+      {markCuota.isError && <p className="text-xs text-danger">{markCuota.error?.message}</p>}
+
+      <div className="flex justify-end gap-2 pt-1">
+        <button
+          type="button"
+          onClick={() => setIsEditing(false)}
+          className="rounded-full px-3 py-1.5 text-sm text-ink-muted hover:text-ink"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={markCuota.isPending}
+          className="rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-paper disabled:opacity-50"
+        >
+          {markCuota.isPending ? 'Guardando…' : 'Guardar'}
+        </button>
+      </div>
     </li>
   )
 }
