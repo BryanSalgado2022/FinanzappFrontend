@@ -12,11 +12,12 @@ import {
   useDeleteDeudor,
   useDeudor,
   useMarkCuota,
+  useRegistrarAbonoCapital,
   useUpdateAmortizacionDeudor,
   useUpdateDeudor,
 } from '../hooks/useDeudores'
 import { formatCOP, formatFecha, monthName } from '../lib/format'
-import type { CuotaDeudor, PeriodoTasa } from '../types'
+import type { CuotaDeudor, ModoAbonoCapital, PeriodoTasa } from '../types'
 
 const inputClass =
   'w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none'
@@ -114,6 +115,12 @@ export function DeudorDetail() {
   const [numeroCuotasDraft, setNumeroCuotasDraft] = useState('')
   const [cuotaInicialDraft, setCuotaInicialDraft] = useState('')
 
+  const [editingAbonoCapital, setEditingAbonoCapital] = useState(false)
+  const [confirmingAbonoCapital, setConfirmingAbonoCapital] = useState(false)
+  const [abonoCapitalMonto, setAbonoCapitalMonto] = useState('')
+  const [abonoCapitalFecha, setAbonoCapitalFecha] = useState('')
+  const [abonoCapitalModo, setAbonoCapitalModo] = useState<ModoAbonoCapital>('reducir_cuota')
+
   const deudor = useDeudor(deudorId)
   const abonos = useAbonos(deudorId)
   const cuotas = useCuotasDeudor(deudorId)
@@ -122,6 +129,7 @@ export function DeudorDetail() {
   const createAbono = useCreateAbono(deudorId)
   const updateAmortizacion = useUpdateAmortizacionDeudor(deudorId)
   const activarAmortizacion = useActivarAmortizacionDeudor(deudorId)
+  const registrarAbonoCapital = useRegistrarAbonoCapital(deudorId)
 
   if (deudor.isLoading || !deudor.data) {
     return <p className="p-5 text-sm text-ink-muted">Cargando…</p>
@@ -132,6 +140,7 @@ export function DeudorDetail() {
     ((Number(d.monto_total) - Number(d.saldo_restante)) / Number(d.monto_total)) * 100,
   )
   const abonosOrdenados = [...(abonos.data ?? [])].sort((a, b) => (a.fecha < b.fecha ? 1 : -1))
+  const abonosCapitalOrdenados = abonosOrdenados.filter((a) => a.es_abono_capital)
   const cuotasOrdenadas = [...(cuotas.data ?? [])].sort((a, b) => (a.anio - b.anio) || (a.mes - b.mes))
   const mesesPendientes = (cuotas.data ?? []).filter((c) => !c.pagado).length
 
@@ -184,6 +193,27 @@ export function DeudorDetail() {
         onSuccess: () => {
           setConfirmingTerminos(false)
           setEditingTerminos(false)
+        },
+      },
+    )
+  }
+
+  const startAbonoCapital = () => {
+    setAbonoCapitalMonto('')
+    setAbonoCapitalFecha('')
+    setAbonoCapitalModo('reducir_cuota')
+    registrarAbonoCapital.reset()
+    setConfirmingAbonoCapital(false)
+    setEditingAbonoCapital(true)
+  }
+
+  const handleSubmitAbonoCapital = () => {
+    registrarAbonoCapital.mutate(
+      { monto: abonoCapitalMonto, fecha: abonoCapitalFecha, modo: abonoCapitalModo },
+      {
+        onSuccess: () => {
+          setConfirmingAbonoCapital(false)
+          setEditingAbonoCapital(false)
         },
       },
     )
@@ -539,20 +569,134 @@ export function DeudorDetail() {
             </div>
           </>
         ) : (
-          <div>
-            <h2 className="mb-3 font-display text-lg font-medium text-ink">Cronograma de pagos</h2>
-            {cuotasOrdenadas.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-line px-4 py-8 text-center">
-                <p className="text-sm text-ink-muted">Cargando cronograma…</p>
+          <>
+            <div>
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h2 className="font-display text-lg font-medium text-ink">Cronograma de pagos</h2>
+                {!editingAbonoCapital && (
+                  <button
+                    type="button"
+                    onClick={startAbonoCapital}
+                    className="shrink-0 text-xs text-ink-muted underline decoration-line underline-offset-4 hover:text-ink"
+                  >
+                    Abono a capital
+                  </button>
+                )}
               </div>
-            ) : (
-              <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-paper-raised">
-                {cuotasOrdenadas.map((cuota) => (
-                  <CuotaRow key={cuota.id} deudorId={deudorId} cuota={cuota} />
-                ))}
-              </ul>
+
+              {editingAbonoCapital && (
+                <div className="mb-4 space-y-3 rounded-xl border border-line p-3">
+                  <p className="text-xs text-ink-muted">
+                    Registra un abono extra a capital: elige si prefieres mantener la cuota y
+                    terminar antes ("reducir plazo"), o mantener el plazo y pagar menos cada mes
+                    ("reducir cuota").
+                  </p>
+                  <MoneyInput
+                    placeholder="Monto del abono"
+                    value={abonoCapitalMonto}
+                    onChange={setAbonoCapitalMonto}
+                    className={inputClass}
+                  />
+                  <input
+                    type="date"
+                    value={abonoCapitalFecha}
+                    onChange={(e) => setAbonoCapitalFecha(e.target.value)}
+                    className={inputClass}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAbonoCapitalModo('reducir_plazo')}
+                      className={`flex-1 rounded-xl border px-3 py-2.5 text-sm ${
+                        abonoCapitalModo === 'reducir_plazo'
+                          ? 'border-accent bg-accent-soft text-ink'
+                          : 'border-line text-ink-muted'
+                      }`}
+                    >
+                      Reducir plazo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAbonoCapitalModo('reducir_cuota')}
+                      className={`flex-1 rounded-xl border px-3 py-2.5 text-sm ${
+                        abonoCapitalModo === 'reducir_cuota'
+                          ? 'border-accent bg-accent-soft text-ink'
+                          : 'border-line text-ink-muted'
+                      }`}
+                    >
+                      Reducir cuota
+                    </button>
+                  </div>
+
+                  {confirmingAbonoCapital && (
+                    <p className="rounded-lg bg-warn-soft px-3 py-2 text-xs text-ink">
+                      Esto recalculará el cronograma restante. Si el abono cubre todo el saldo, el
+                      deudor se marcará como terminado automáticamente.
+                    </p>
+                  )}
+
+                  {registrarAbonoCapital.isError && (
+                    <p className="text-xs text-danger">{registrarAbonoCapital.error?.message}</p>
+                  )}
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingAbonoCapital(false)
+                        setConfirmingAbonoCapital(false)
+                      }}
+                      className="rounded-full px-3 py-1.5 text-sm text-ink-muted hover:text-ink"
+                    >
+                      Cancelar
+                    </button>
+                    {!confirmingAbonoCapital ? (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingAbonoCapital(true)}
+                        disabled={!abonoCapitalMonto || !abonoCapitalFecha}
+                        className="rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-paper disabled:opacity-50"
+                      >
+                        Guardar
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSubmitAbonoCapital}
+                        disabled={registrarAbonoCapital.isPending}
+                        className="rounded-full bg-ink px-3 py-1.5 text-sm font-medium text-paper disabled:opacity-50"
+                      >
+                        {registrarAbonoCapital.isPending ? 'Guardando…' : 'Confirmar'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {cuotasOrdenadas.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-line px-4 py-8 text-center">
+                  <p className="text-sm text-ink-muted">Cargando cronograma…</p>
+                </div>
+              ) : (
+                <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-paper-raised">
+                  {cuotasOrdenadas.map((cuota) => (
+                    <CuotaRow key={cuota.id} deudorId={deudorId} cuota={cuota} />
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {abonosCapitalOrdenados.length > 0 && (
+              <div>
+                <h2 className="mb-3 font-display text-lg font-medium text-ink">Abonos a capital</h2>
+                <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-paper-raised">
+                  {abonosCapitalOrdenados.map((abono) => (
+                    <AbonoRow key={abono.id} deudorId={deudorId} abono={abono} />
+                  ))}
+                </ul>
+              </div>
             )}
-          </div>
+          </>
         )}
       </main>
     </>

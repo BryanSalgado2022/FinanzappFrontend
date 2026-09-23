@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../lib/apiClient'
 import type {
   Abono,
+  AbonoCapitalCreateInput,
   AbonoCreateInput,
   CuotaDeudor,
   CuotaDeudorUpdateInput,
@@ -124,6 +125,21 @@ export function useActivarAmortizacionDeudor(id: number) {
       void queryClient.invalidateQueries({ queryKey: deudoresKey })
       void queryClient.invalidateQueries({ queryKey: deudorKey(id) })
       void queryClient.invalidateQueries({ queryKey: cuotasKey(id) })
+      void queryClient.invalidateQueries({ queryKey: ['summary'] })
+    },
+  })
+}
+
+export function useRegistrarAbonoCapital(id: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: AbonoCapitalCreateInput) =>
+      apiClient.post<Deudor>(`/deudores/${id}/abono-capital`, input),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: deudoresKey })
+      void queryClient.invalidateQueries({ queryKey: deudorKey(id) })
+      void queryClient.invalidateQueries({ queryKey: cuotasKey(id) })
+      void queryClient.invalidateQueries({ queryKey: abonosKey(id) })
       void queryClient.invalidateQueries({ queryKey: ['summary'] })
     },
   })

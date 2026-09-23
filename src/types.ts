@@ -248,12 +248,24 @@ export interface Abono {
   monto: string
   fecha: string
   interes: string | null
+  es_abono_capital: boolean
 }
 
 export interface AbonoCreateInput {
   monto: string
   fecha: string
   interes?: string
+}
+
+export type ModoAbonoCapital = 'reducir_plazo' | 'reducir_cuota'
+
+// POST /deudores/{id}/abono-capital - records an extraordinary principal
+// prepayment on an amortized debtor. Always pure principal, unlike
+// AbonoCreateInput - no interes field.
+export interface AbonoCapitalCreateInput {
+  monto: string
+  fecha: string
+  modo: ModoAbonoCapital
 }
 
 export interface Gasto {
