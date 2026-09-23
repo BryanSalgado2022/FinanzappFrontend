@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { CheckCircle2, Pencil, Trash2 } from 'lucide-react'
+import { Check, CheckCircle2, Pencil, Trash2 } from 'lucide-react'
 import { MoneyInput } from '../components/MoneyInput'
 import { ProgressRing } from '../components/ProgressRing'
 import { PagadoToggle } from '../components/MonthEntryRow'
@@ -69,15 +69,26 @@ function CuotaRow({ deudorId, cuota }: { deudorId: number; cuota: CuotaDeudor })
         <button
           type="button"
           onClick={startEditing}
-          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm transition hover:bg-paper"
+          className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition hover:bg-paper"
         >
-          <span className="text-ink-muted">
-            {monthName(cuota.mes)} {cuota.anio}
+          <span
+            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+              cuota.pagado ? 'bg-accent text-paper-raised' : 'border-2 border-warn bg-paper-raised'
+            }`}
+          >
+            {cuota.pagado && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className={cuota.pagado ? 'text-ink-muted' : 'font-medium text-ink'}>
+              {monthName(cuota.mes)} {cuota.anio}
+            </span>
             {cuota.pagado && cuota.fecha_pago && (
-              <span className="ml-1.5 text-xs">· pagado el {formatFecha(cuota.fecha_pago)}</span>
+              <span className="block text-xs text-ink-muted">pagado el {formatFecha(cuota.fecha_pago)}</span>
             )}
           </span>
-          <span className="font-tabular text-ink">{formatCOP(cuota.monto_pagado ?? cuota.monto_planeado)}</span>
+          <span className={`font-tabular ${cuota.pagado ? 'text-ink-muted' : 'font-semibold text-ink'}`}>
+            {formatCOP(cuota.monto_pagado ?? cuota.monto_planeado)}
+          </span>
         </button>
       </li>
     )
